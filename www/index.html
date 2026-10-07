@@ -88,6 +88,8 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
       <label id="prl">Pregnancy / nursing<select id="pr"><option value="0">No</option><option value="1">Late pregnancy</option><option value="2">Nursing</option></select></label>
     </div>
     <p class="note" id="why"></p>
+    <p class="note" id="wxs"></p>
+    <button class="btn sm" id="wxb">Update weather now</button>
   </div>
   <p class="log" id="log"></p>
 </main>
@@ -153,9 +155,10 @@ function drop(){try{ac=ac||new AudioContext();if(ac.state==="suspended")ac.resum
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+.3);
   s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t)};
  if(buf)play();else ac.decodeAudioData(b2a(SND)).then(b=>{buf=b;play()})}catch(e){}}
-const buzz=p=>{const H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics;
- if(H){try{Array.isArray(p)?(p.length>3?H.notification({type:"SUCCESS"}):H.impact({style:"MEDIUM"})):H.impact({style:"LIGHT"})}catch(e){}}
- else{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}};
+const buzz=p=>{const seq=Array.isArray(p)?p.map((d,i)=>i%2?Math.max(d,50):Math.max(d,30)):[40];
+ try{if(navigator.vibrate&&navigator.vibrate(seq))return}catch(e){}
+ const H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics;if(!H)return;
+ let t=0;seq.forEach((d,k)=>{if(k%2===0)setTimeout(()=>{try{H.vibrate({duration:d})}catch(e){}},t);t+=d})};
 
 DR.forEach(([n,f],i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;$("#drink").appendChild(o)});
 function add(ml){if(!(ml>0&&ml<=3000))return;const [n,f,c]=DR[$("#drink").value],before=eff()>=goal();
@@ -198,17 +201,23 @@ async function plan(){if(!LN)return;
 async function nativeInit(){if(!LN)return;
  try{await LN.requestPermissions();
   await LN.createChannel({id:"drink",name:"Drink reminders",importance:4,sound:"drop.wav",vibration:true});
-  await LN.registerActionTypes({types:[{id:"DRINK",actions:[{id:"add250",title:"+250 ml"}]}]});
-  LN.addListener("localNotificationActionPerformed",e=>{if(e.actionId==="add250")add(250);else if(e.notification.id===9001){$("#panel").classList.add("on");$("#kg").focus()}});
+  await LN.registerActionTypes({types:[{id:"DRINK",actions:[{id:"add250",title:"+250 ml"},{id:"add500",title:"+500 ml"},{id:"custom",title:"Custom",input:true,inputButtonTitle:"Add",inputPlaceholder:"ml"}]}]});
+  LN.addListener("localNotificationActionPerformed",e=>{if(e.actionId==="add250")add(250);else if(e.actionId==="add500")add(500);else if(e.actionId==="custom")add(+e.inputValue);else if(e.notification.id===9001){$("#panel").classList.add("on");$("#kg").focus()}});
   await LN.schedule({notifications:[{id:9001,channelId:"drink",title:"Update your weight",body:"A quick weight check keeps your goal accurate.",schedule:{on:{day:1,hour:9,minute:0},allowWhileIdle:true}}]});
   plan()}catch(e){}}
-async function wx(){if(Date.now()-(S.wxT||0)<4*3600e3)return;
- try{const G=CP.Geolocation,pos=G?await G.getCurrentPosition({timeout:10000}):await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(r,j,{timeout:10000}));
+async function wx(force){const st=m=>{const e=$("#wxs");if(e)e.textContent=m};
+ if(force!==true&&Date.now()-(S.wxT||0)<4*3600e3)return;
+ try{st("Updating weather...");const G=CP.Geolocation;
+  if(G){const pm=await G.requestPermissions({permissions:["coarseLocation"]});if(pm.location==="denied"&&pm.coarseLocation==="denied"){st("Location permission denied. Enter weather by hand or allow location in the app settings.");return}}
+  const pos=G?await G.getCurrentPosition({enableHighAccuracy:false,timeout:20000,maximumAge:3600000}):await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(r,j,{timeout:20000}));
   const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&daily=temperature_2m_mean,relative_humidity_2m_mean&forecast_days=1&timezone=auto"),j=await r.json();
   S.temp=Math.round(j.daily.temperature_2m_mean[0]);S.rh=Math.round(j.daily.relative_humidity_2m_mean[0]);S.alt=Math.max(0,Math.round(j.elevation||0));S.wxT=Date.now();
-  ["temp","rh","alt"].forEach(k=>$("#"+k).value=S[k]);render()}catch(e){}}
+  ["temp","rh","alt"].forEach(k=>$("#"+k).value=S[k]);
+  st("Weather updated "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));render()}
+ catch(e){st("Weather failed: "+((e&&e.message)||JSON.stringify(e)))}}
+$("#wxb").onclick=()=>wx(true);
 addEventListener("resize",rs);rs();render();
 if(!reduce){P=0;loop()}else{P=target;draw()}
-nativeInit();wx();document.addEventListener("visibilitychange",()=>{if(!document.hidden){wx();plan()}});
+nativeInit().then(()=>wx());document.addEventListener("visibilitychange",()=>{if(!document.hidden){wx();plan()}});
 </script>
 </body></html>
