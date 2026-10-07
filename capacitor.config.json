@@ -1,0 +1,13 @@
+{
+  "appId": "app.shoreline.water",
+  "appName": "Shoreline",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#000000"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "sound": "drop.wav"
+    }
+  }
+}
