@@ -30,6 +30,7 @@ button,select,input{font:inherit;color:var(--foam)}
 background:#121212;box-shadow:0 0 0 #0000;transition:transform .12s,background .35s,box-shadow .35s,border-color .35s}
 .btn:active{transform:scale(.96);background:#1b1b1b}
 [hidden]{display:none!important}
+.btn{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #drink{text-align:center;text-align-last:center}
 *{-webkit-tap-highlight-color:transparent}
@@ -72,7 +73,7 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
     <button class="btn" id="cadd" style="flex:0 0 38%">Add</button>
   </div>
   <div class="row">
-    <button class="btn sm" id="undo">Undo last</button>
+    <button class="btn sm" id="undo">Undo (hold to clear)</button>
     <button class="btn sm" id="setup">Goal settings</button>
   </div>
   <div class="panel" id="panel">
@@ -137,7 +138,7 @@ function render(){
  $("#left").textContent=e>=g?"goal reached":(g-e)+" ml left";
  $("#fact").textContent=FACTS[p>=1?4:p>=.75?3:p>=.5?2:p>=.25?1:0][new Date().getDate()%2];
  $("#log").textContent=S.log.length?S.log.length+" drinks · "+e+" of "+g+" ml":"Nothing logged yet today";
- save();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
+ save();lbl();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
 }
 function paint(){dots.forEach((d,i)=>d.setAttribute("fill",i<shown?"#f3f3ef":"#2c2c2c"));
  idots.forEach((d,i)=>d.setAttribute("fill",i<shownR?"#ff3b30":i<shown2?"#b4b4af":"#1e1e1e"))}
@@ -162,13 +163,19 @@ const buzz=p=>{const seq=Array.isArray(p)?p.map((d,i)=>i%2?Math.max(d,50):Math.m
 
 DR.forEach(([n,f],i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;$("#drink").appendChild(o)});
 function add(ml){if(!(ml>0&&ml<=3000))return;const [n,f,c]=DR[$("#drink").value],before=eff()>=goal();
- S.log.push({ml,f,n,c});surge=.05;drop();
+ S.log.push({ml,f,n,c});cleared=null;surge=.05;drop();
  buzz(!before&&eff()>=goal()?[20,60,20,60,40]:18);render()}
 document.querySelectorAll("[data-ml]").forEach(b=>b.onclick=()=>add(+b.dataset.ml));
 $("#cust").onclick=()=>{const r=$("#custrow");r.hidden=!r.hidden;if(!r.hidden)$("#cml").focus()};
 $("#cadd").onclick=()=>{add(+$("#cml").value);$("#cml").value=""};
 $("#cml").onkeydown=e=>{if(e.key==="Enter")$("#cadd").click()};
-$("#undo").onclick=()=>{if(S.log.pop()){buzz([8,40,8]);render()}};
+let ht,held=false,cleared=null;const ub=$("#undo");
+const lbl=()=>{ub.textContent=!S.log.length&&cleared?"Restore":"Undo (hold to clear)"};
+ub.onpointerdown=()=>{held=false;ub.classList.add("glow");ht=setTimeout(()=>{held=true;if(S.log.length){cleared=S.log.slice();S.log=[];buzz([40,80,40,80,120]);render()}},700)};
+const unhold=()=>{clearTimeout(ht);ub.classList.remove("glow")};
+ub.onpointerup=ub.onpointerleave=ub.onpointercancel=unhold;ub.oncontextmenu=e=>e.preventDefault();
+ub.onclick=()=>{if(held){held=false;return}
+ if(!S.log.length&&cleared){S.log=cleared;cleared=null;buzz(40)}else if(S.log.pop())buzz([8,40,8]);render()};
 $("#setup").onclick=()=>$("#panel").classList.toggle("on");
 ["sex","by","kg","bf","act","temp","rh","alt","pr"].forEach(k=>{const el=$("#"+k);el.value=S[k];
  el.onchange=()=>{if(k==="sex")S[k]=el.value;else if(k==="bf"&&el.value==="")S.bf="";else if(el.value!==""&&!isNaN(+el.value))S[k]=+el.value;render()}});
