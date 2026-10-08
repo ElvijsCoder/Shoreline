@@ -41,12 +41,14 @@ Everything stays on your phone. No account, no ads.
 ### Logging
 - **Your cups:** Three quick buttons with your own sizes (your mug, your bottle), plus Custom.
 - **Your drinks:** Coffee, tea and friends built in, plus your own with their caffeine.
+- **Bottle mode:** Set your bottle size, then log ¼, ½, ¾ or any amount with a slider.
 - **Undo:** Tap to undo, hold to clear the day, tap again to restore.
 - **Forgot one?** Add it to any day, at the right time, from History.
 
 ### Caffeine
-- **Inner ring:** Shows caffeine against your limit (EFSA), turning red past it.
-- **Tips:** For big single doses and late-day coffee.
+- **Inner ring:** Shows today's caffeine against your limit (EFSA), turning red past it.
+- **Wears off:** Bright dots are caffeine still active in your body; they fade over the day (half-life about 5 hours).
+- **Tips:** For big single doses, and how much will still be active at bedtime.
 - **Cutoff reminder:** Only on days you've actually had caffeine.
 
 ### Reminders
@@ -56,7 +58,7 @@ Everything stays on your phone. No account, no ads.
 - **Weekly weight check:** A Monday nudge to keep the goal accurate.
 
 ### Home screen
-- **Widgets:** Small (2×2: tap the ring to add a cup) and wide (4×2: two cups). Both have **UNDO**, and the ring fills up when you tap.
+- **Widgets:** Small (2×2: tap the ring to add a cup) and wide (4×2: the shoreline itself, moving across as you drink, with two cups). Both have **UNDO** and fill up when you tap.
 - **Quick Settings tile:** Adds your middle cup and shows progress.
 - **Themed icon:** Follows Nothing's monochrome icons.
 
@@ -65,7 +67,13 @@ Everything stays on your phone. No account, no ads.
 - **Charts:** Week and month dot charts and a month calendar.
 - **Day view:** Tap any day to see its drinks, remove one, or add one you forgot.
 
+### Feel
+- **The goal wave:** Reaching your goal sends a wave across the screen, leaving foam behind, with a soft wash sound.
+- **Tilt:** The water sloshes towards the low side when you tilt the phone.
+- **Rolling counter:** The percentage and "ml left" roll digit by digit, like a mechanical counter.
+
 ### The rest
+- **Sunday recap:** Your week in one notification: goal days, streak and daily average.
 - **Weather:** Fetched from Open-Meteo with a rough (~1 km) location, a few times a day, only if you turn it on.
 - **Backup:** Export and import everything as one file.
 - **Reduce motion:** Respects Android's "Remove animations."

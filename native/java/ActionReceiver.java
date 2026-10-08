@@ -59,6 +59,10 @@ public class ActionReceiver extends BroadcastReceiver {
         Notify.nudge(c, "Quick weight check", "Your weight keeps the water goal accurate. Tap to update it.", "settings:you");
         Scheduler.scheduleWeight(c);
         break;
+      case Scheduler.RECAP:
+        Notify.nudge(c, "Your week", recap(c), "history");
+        Scheduler.scheduleRecap(c);
+        break;
       default: break;
     }
   }
@@ -71,6 +75,35 @@ public class ActionReceiver extends BroadcastReceiver {
     int[] after = Store.state(c);
     WidgetBase.animate(c, before, after);
     Store.changed(c);
+  }
+
+  /** "Goal met 5 of 7 days · 3-day streak · about 2,150 ml a day" */
+  static String recap(Context c) {
+    org.json.JSONObject h = Store.hist(c);
+    java.util.Calendar day = java.util.Calendar.getInstance();
+    int met = 0, logged = 0, total = 0;
+    for (int i = 0; i < 7; i++) {
+      org.json.JSONObject d = h.optJSONObject(Store.dayOf(day.getTimeInMillis()));
+      if (d != null && d.optInt("e") > 0) {
+        logged++;
+        total += d.optInt("e");
+        if (d.optInt("g", 0) > 0 && d.optInt("e") >= d.optInt("g")) met++;
+      }
+      day.add(java.util.Calendar.DAY_OF_YEAR, -1);
+    }
+    if (logged == 0) return "Nothing logged this week. A fresh start tomorrow.";
+    // Streak: consecutive goal days back from today (today only counts once it's met)
+    java.util.Calendar s = java.util.Calendar.getInstance();
+    int streak = 0;
+    if (!met(h, s)) s.add(java.util.Calendar.DAY_OF_YEAR, -1);
+    while (met(h, s)) { streak++; s.add(java.util.Calendar.DAY_OF_YEAR, -1); }
+    return String.format(java.util.Locale.US, "Goal met %d of 7 days · %s · about %,d ml a day",
+        met, streak > 0 ? streak + "-day streak" : "no streak right now", total / logged);
+  }
+
+  private static boolean met(org.json.JSONObject h, java.util.Calendar day) {
+    org.json.JSONObject d = h.optJSONObject(Store.dayOf(day.getTimeInMillis()));
+    return d != null && d.optInt("g", 0) > 0 && d.optInt("e") >= d.optInt("g");
   }
 
   /** Only nudge when awake, behind pace, under the goal (and any fluid limit). */

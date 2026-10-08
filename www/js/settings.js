@@ -2,7 +2,7 @@
 // is worked out.
 import { store, fromV1 } from "./store.js";
 import { state, saveProfile, reload, currentGoal, $ } from "./state.js";
-import { turnover, caffeineCap, pregnancyExtra } from "./goal.js";
+import { turnover, caffeineCap, pregnancyExtra, CAFFEINE_HALF_LIFE_H } from "./goal.js";
 import { mountFields, syncFields } from "./fields.js";
 import { openSheet } from "./sheets.js";
 import { updateWeather } from "./weather.js";
@@ -19,7 +19,9 @@ function explain() {
     + "The equation explains just under half of person-to-person variation, so treat it as a starting point. "
     + (p.adj ? `Your morning checks adjust it by ${Math.round(p.adj * 100)}%. ` : "")
     + (p.limit > 0 ? `Your fluid limit of ${p.limit} ml caps it. ` : "")
-    + `Caffeine limit ${caffeineCap(p)} mg a day (EFSA 2015: 5.7 mg per kg of body weight, up to 400 mg, or 200 mg in pregnancy and nursing).`;
+    + `Caffeine limit ${caffeineCap(p)} mg a day (EFSA 2015: 5.7 mg per kg of body weight, up to 400 mg, or 200 mg in pregnancy and nursing). `
+    + `The bright inner dots are caffeine still active in your body, worked out with a typical half-life of ${CAFFEINE_HALF_LIFE_H} hours; `
+    + "it varies between people (roughly 3–7 hours) and is longer in pregnancy, so treat it as a guide.";
 }
 
 function notifStatus() {

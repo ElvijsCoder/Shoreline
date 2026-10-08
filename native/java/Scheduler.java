@@ -21,6 +21,7 @@ public final class Scheduler {
   static final String MIDNIGHT = "app.shoreline.water.MIDNIGHT";
   static final String CAFFEINE = "app.shoreline.water.CAFFEINE";
   static final String WEIGHT = "app.shoreline.water.WEIGHT";
+  static final String RECAP = "app.shoreline.water.RECAP";
 
   private Scheduler() {}
 
@@ -96,6 +97,7 @@ public final class Scheduler {
     scheduleReminder(c, -1);
     scheduleMidnight(c);
     scheduleWeight(c);
+    scheduleRecap(c);
   }
 
   /** Next reminder: one interval from now (two if ahead), paused 2 h after over a litre in an hour. */
@@ -159,6 +161,23 @@ public final class Scheduler {
     Calendar t = Calendar.getInstance();
     t.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
     t.set(Calendar.HOUR_OF_DAY, (int) h);
+    t.set(Calendar.MINUTE, (int) Math.round((h % 1) * 60));
+    t.set(Calendar.SECOND, 0);
+    t.set(Calendar.MILLISECOND, 0);
+    while (t.getTimeInMillis() <= System.currentTimeMillis()) t.add(Calendar.WEEK_OF_YEAR, 1);
+    set(am, t.getTimeInMillis(), pi);
+  }
+
+  /** Sunday recap: Sunday evening at 19:00, or an hour before bed if that's earlier. */
+  static void scheduleRecap(Context c) {
+    JSONObject p = Store.profile(c);
+    PendingIntent pi = pi(c, RECAP, 7005);
+    AlarmManager am = c.getSystemService(AlarmManager.class);
+    if (!p.optBoolean("recap", true)) { am.cancel(pi); return; }
+    double h = Math.max(window(p)[0] + 1, Math.min(19, window(p)[1] - 1));
+    Calendar t = Calendar.getInstance();
+    t.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+    t.set(Calendar.HOUR_OF_DAY, (int) Math.min(h, 23));
     t.set(Calendar.MINUTE, (int) Math.round((h % 1) * 60));
     t.set(Calendar.SECOND, 0);
     t.set(Calendar.MILLISECOND, 0);

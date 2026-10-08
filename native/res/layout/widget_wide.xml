@@ -9,11 +9,13 @@
     android:orientation="horizontal"
     android:padding="10dp">
 
+    <!-- The shoreline, drawn by WideWidget (the id stays "ring" so both widgets share code) -->
     <ImageView
         android:id="@+id/ring"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="1.25"
+        android:contentDescription="Today's progress"
         android:scaleType="fitCenter" />
 
     <LinearLayout

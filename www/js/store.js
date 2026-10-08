@@ -13,7 +13,7 @@ export const DEFAULT_PROFILE = {
   kg: 75, sex: "m", by: 1990, bf: 0, act: 1, pr: 0, limit: 0,
   temp: 15, rh: 60, alt: 0, autoWeather: false, wxT: 0,
   wake: "08:00", slp: "22:30", iv: 90, cut: "14:00", remind: true, weightRemind: true,
-  cups: [150, 250, 500], drinks: [], lc: 0,
+  cups: [150, 250, 500], drinks: [], lc: 0, bottle: 0, tilt: true, recap: true,
   ck: [], adj: 0, goal: 0, onboarded: false,
 };
 

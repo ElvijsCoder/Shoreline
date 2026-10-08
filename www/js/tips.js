@@ -1,5 +1,5 @@
 // The line of text under the ring: a warning if something needs attention, otherwise a fact.
-import { dayWindow, expectedFraction, isAwake, hours, caffeineCap } from "./goal.js";
+import { dayWindow, expectedFraction, isAwake, hours, caffeineCap, activeCaffeine, bedtime, CAFFEINE_HALF_LIFE_H } from "./goal.js";
 
 const FACTS = [
   ["About 1.4% body water loss lowered mood and brought on headaches in a study of young women.",
@@ -25,6 +25,10 @@ export function tip({ p, caf, entries, profile, goal }) {
   if (caf > cap) return "You are over today's caffeine limit. Stick to water for the rest of the day.";
   if (last && last.c > 0 && Date.now() - last.t < 6e5 && (last.ml * last.c) / 100 > Math.min(200, 3 * profile.kg))
     return "That is a big single dose of caffeine. Up to about 200 mg at once is considered fine.";
+  const atBed = activeCaffeine(entries, bedtime(profile, now));
+  if (atBed >= 50 && Date.now() < bedtime(profile, now)) {
+    return `About ${Math.round(atBed / 10) * 10} mg of caffeine will still be active at bedtime. It halves roughly every ${CAFFEINE_HALF_LIFE_H} hours.`;
+  }
   if (late) return "Caffeine this late can cost you sleep. Even 100 mg close to bedtime can affect it.";
   if (profile.temp >= 25 && p < 1) return "Hot day: your goal is raised. Sip steadily rather than all at once.";
   if (p < 1 && isAwake(h, win) && expectedFraction(h, win) - p > 0.2) return "Behind pace for this time of day. A glass now catches you up.";

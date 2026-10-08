@@ -42,18 +42,26 @@ public abstract class WidgetBase extends AppWidgetProvider {
       c.drawCircle((float) (cx + radius * Math.cos(a)), (float) (cx + radius * Math.sin(a)), dot, i < lit ? on : off);
     }
     String t = Math.round(eff * 100f / goal) + "%";
+    float cell = Math.min(px * 0.05f, px * 0.52f / (t.length() * 6 - 1));
+    dotText(c, t, cx, cx, cell, on);
+    return b;
+  }
+
+  /** Draws text (digits and %) in 5×7 dot-matrix, centred on (cx, cy). */
+  static void dotText(Canvas c, String t, float cx, float cy, float cell, Paint paint) {
     int n = t.length(), cols = n * 6 - 1;
-    float cell = Math.min(px * 0.05f, px * 0.52f / cols), d = cell * 0.4f;
-    float x0 = cx - cols * cell / 2f, y0 = cx - 7 * cell / 2f;
+    float d = cell * 0.4f, x0 = cx - cols * cell / 2f, y0 = cy - 7 * cell / 2f;
     for (int k = 0; k < n; k++) {
       char ch = t.charAt(k);
       String[] g = GLYPHS[ch == '%' ? 10 : Math.max(0, Math.min(9, ch - '0'))].split(",");
       for (int row = 0; row < 7; row++)
         for (int col = 0; col < 5; col++)
-          if (g[row].charAt(col) == '1') c.drawCircle(x0 + (k * 6 + col + .5f) * cell, y0 + (row + .5f) * cell, d, on);
+          if (g[row].charAt(col) == '1') c.drawCircle(x0 + (k * 6 + col + .5f) * cell, y0 + (row + .5f) * cell, d, paint);
     }
-    return b;
   }
+
+  /** The picture on the left of the widget; the ring by default (the wide widget draws the shoreline). */
+  Bitmap art(int eff, int goal, int shown) { return ring(eff, goal, shown); }
 
   static String left(int eff, int goal) {
     return eff >= goal ? "goal reached" : String.format(java.util.Locale.US, "%,d ml left", goal - eff);
@@ -62,7 +70,7 @@ public abstract class WidgetBase extends AppWidgetProvider {
   void draw(Context c, AppWidgetManager m, int id, int shown) {
     int[] st = Store.state(c);
     RemoteViews v = new RemoteViews(c.getPackageName(), layout());
-    v.setImageViewBitmap(R.id.ring, ring(st[0], st[1], shown));
+    v.setImageViewBitmap(R.id.ring, art(st[0], st[1], shown));
     v.setTextViewText(R.id.left, left(st[0], st[1]));
     v.setOnClickPendingIntent(R.id.root, Notify.open(c, "home"));
     v.setOnClickPendingIntent(R.id.undo, ActionReceiver.simple(c, ActionReceiver.UNDO, 9103));

@@ -122,3 +122,27 @@ export function bestStreak(hist) {
   }
   return best;
 }
+
+// --- Caffeine that wears off ---------------------------------------------------------------
+
+/** Typical caffeine half-life in hours. It varies between people (roughly 3–7 h) and is longer in pregnancy. */
+export const CAFFEINE_HALF_LIFE_H = 5;
+
+/** Caffeine (mg) still active at time `at`: each drink's dose halves every half-life. */
+export function activeCaffeine(entries, at = Date.now(), halfLife = CAFFEINE_HALF_LIFE_H) {
+  return entries.reduce((sum, e) => {
+    if (!(e.c > 0) || e.t > at) return sum;
+    const dose = (e.ml * e.c) / 100, hoursSince = (at - e.t) / 3.6e6;
+    return sum + dose * Math.pow(0.5, hoursSince / halfLife);
+  }, 0);
+}
+
+/** Tonight's bedtime as a timestamp (handles bedtimes after midnight). */
+export function bedtime(profile, now = new Date()) {
+  const win = dayWindow(profile.wake, profile.slp);
+  const h = now.getHours() + now.getMinutes() / 60;
+  const base = new Date(now);
+  base.setHours(0, 0, 0, 0);
+  if (onTimeline(h, win) >= 24) base.setDate(base.getDate() - 1); // still "yesterday's" waking day
+  return base.getTime() + win.end * 3.6e6;
+}

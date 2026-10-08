@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   goal, caffeineCap, pregnancyExtra, adjFromChecks, dayWindow, onTimeline,
-  expectedFraction, isAwake, effective, caffeine, streak, bestStreak,
+  expectedFraction, isAwake, effective, caffeine, streak, bestStreak, activeCaffeine, bedtime,
 } from "../www/js/goal.js";
 
 const now = new Date("2026-06-15T12:00:00");
@@ -83,4 +83,23 @@ test("streaks count consecutive goal days", () => {
   };
   assert.equal(streak(hist, "2026-06-15", prev), 1);
   assert.equal(bestStreak(hist), 2);
+});
+
+test("caffeine halves every half-life", () => {
+  const t0 = new Date("2026-06-15T08:00:00").getTime();
+  const coffee = [{ ml: 250, f: 1, c: 40, t: t0 }]; // 100 mg
+  assert.equal(Math.round(activeCaffeine(coffee, t0)), 100);
+  assert.equal(Math.round(activeCaffeine(coffee, t0 + 5 * 3.6e6)), 50);
+  assert.equal(Math.round(activeCaffeine(coffee, t0 + 10 * 3.6e6)), 25);
+  assert.equal(activeCaffeine(coffee, t0 - 1000), 0); // not drunk yet
+});
+
+test("bedtime is tonight, even after midnight", () => {
+  const p = { wake: "08:00", slp: "00:30" };
+  const evening = bedtime(p, new Date("2026-06-15T21:00:00"));
+  assert.equal(new Date(evening).toString(), new Date("2026-06-16T00:30:00").toString());
+  const lateNight = bedtime(p, new Date("2026-06-16T00:10:00")); // still awake, same night
+  assert.equal(new Date(lateNight).toString(), new Date("2026-06-16T00:30:00").toString());
+  const normal = bedtime({ wake: "07:00", slp: "23:00" }, new Date("2026-06-15T12:00:00"));
+  assert.equal(new Date(normal).toString(), new Date("2026-06-15T23:00:00").toString());
 });

@@ -30,7 +30,7 @@ header b { font-size: 26px; letter-spacing: .08em; flex: 1; }
 .mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 22%; }
 .mid .big { font-size: 52px; line-height: 1; }
 .mid .sub { color: var(--dim); margin-top: 6px; }
-.mid .caf { font-size: 12px; margin-top: 2px; color: var(--dim); }
+.mid .caf { font-size: 12px; margin-top: 2px; color: var(--dim); white-space: pre-line; line-height: 1.35; }
 .mid .caf.over { color: var(--red); }
 .fact { min-height: 3.9em; text-align: center; color: #d6d6d1; max-width: 34ch; margin: 0 auto; }
 
@@ -92,3 +92,20 @@ label { display: flex; flex-direction: column; gap: 4px; color: var(--dim); }
 .dots i.on { background: var(--foam); }
 
 @media (prefers-reduced-motion: reduce) { .btn, .tog .s i, .ringbox circle { transition: none; } }
+
+/* Rolling counter digits */
+.roll { display: inline-block; overflow: hidden; height: 1.25em; line-height: 1.25em; vertical-align: bottom; }
+.mid .big .roll { height: 1em; line-height: 1em; }
+.roll > span { display: flex; flex-direction: column; }
+.roll > .up { animation: roll-up .32s cubic-bezier(.3, .7, .3, 1) forwards; }
+.roll > .down { transform: translateY(-50%); animation: roll-down .32s cubic-bezier(.3, .7, .3, 1) forwards; }
+@keyframes roll-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes roll-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+
+/* Bottle mode */
+.bottle { display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
+.bottle .amount { text-align: center; font-size: 30px; }
+.chips { display: flex; gap: 8px; }
+input[type="range"] { -webkit-appearance: none; appearance: none; height: 28px; padding: 0; background: transparent; border: 0; }
+input[type="range"]::-webkit-slider-runnable-track { height: 3px; background: #2c2c2c; border-radius: 2px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9.5px; border-radius: 50%; background: var(--foam); box-shadow: 0 0 12px #f3f3ef88; }

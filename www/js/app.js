@@ -1,11 +1,12 @@
 // Shoreline's home screen and start-up.
 import { store, todayKey, newId, migrateOldVersion } from "./store.js";
 import { state, drinks, currentGoal, onRender, render, reload, saveProfile, syncGoal, $, $$ } from "./state.js";
-import { effective, caffeine, caffeineCap, adjFromChecks } from "./goal.js";
+import { effective, caffeine, caffeineCap, adjFromChecks, activeCaffeine } from "./goal.js";
+import { rollTo } from "./rolling.js";
 import { initRing, setRing } from "./ring.js";
-import { initShore, setTide, splash } from "./shore.js";
+import { initShore, setTide, splash, celebrate } from "./shore.js";
 import { tip } from "./tips.js";
-import { playDrop, haptic } from "./feedback.js";
+import { playDrop, playWash, haptic } from "./feedback.js";
 import { initHistory } from "./history.js";
 import { initSettings, openSettings } from "./settings.js";
 import { startWelcome } from "./welcome.js";
@@ -17,14 +18,14 @@ let cleared = null; // what "hold to clear" removed, so Restore can bring it bac
 
 function drawHome() {
   const p = state.profile, g = currentGoal(), e = effective(state.entries), pct = e / g;
-  const caf = caffeine(state.entries), cap = caffeineCap(p);
+  const caf = caffeine(state.entries), cap = caffeineCap(p), active = activeCaffeine(state.entries);
 
-  setRing(pct, caf / cap, Math.max(caf - cap, 0) / cap, caf > 0);
+  setRing({ water: pct, total: caf / cap, active: active / cap, over: Math.max(caf - cap, 0) / cap });
   setTide(pct);
-  $("#pct").textContent = `${Math.round(pct * 100)}%`;
-  $("#left").textContent = e >= g ? "goal reached" : `${(g - e).toLocaleString()} ml left`;
+  rollTo($("#pct"), `${Math.round(pct * 100)}%`);
+  rollTo($("#left"), e >= g ? "goal reached" : `${(g - e).toLocaleString()} ml left`);
   const cafEl = $("#caf");
-  cafEl.textContent = caf > 0 ? `caffeine ${Math.round(caf)} / ${cap} mg` : "";
+  cafEl.textContent = caf > 0 ? `caffeine ${Math.round(caf)} / ${cap} mg\n~${Math.round(active)} mg still active` : "";
   cafEl.classList.toggle("over", caf > cap);
   $("#fact").textContent = tip({ p: pct, caf, entries: state.entries, profile: p, goal: g });
   $("#log").textContent = state.entries.length
@@ -54,6 +55,9 @@ function drawHome() {
     custom.onclick = () => { const r = $("#customRow"); r.hidden = !r.hidden; if (!r.hidden) $("#customMl").focus(); };
     cups.appendChild(custom);
   }
+  $("#bottleOpen").hidden = !(p.bottle > 0);
+  $("#bottleOpen").textContent = `Bottle · ${p.bottle} ml`;
+  if (!(p.bottle > 0)) $("#bottleRow").hidden = true;
   $("#lastCustom").hidden = !p.lc;
   $("#lastCustom").textContent = `+${p.lc} ml (last custom)`;
   $("#undo").textContent = !state.entries.length && cleared ? "Restore" : "Undo (hold to clear)";
@@ -79,9 +83,15 @@ async function add(ml) {
   const entry = { id: newId(), t: Date.now(), ml, f: d.f, c: d.c, n: d.n };
   state.entries = [...state.entries, entry]; // show it straight away…
   cleared = null;
-  splash();
   playDrop();
-  haptic(!before && effective(state.entries) >= currentGoal() ? "goal" : "click");
+  if (!before && effective(state.entries) >= currentGoal()) {
+    celebrate(); // the goal wave
+    setTimeout(playWash, 120);
+    haptic("goal");
+  } else {
+    splash();
+    haptic("click");
+  }
   render();
   try {
     await store.add(entry); // …then save it
@@ -135,6 +145,24 @@ function wireHome() {
   $("#customMl").onkeydown = (e) => { if (e.key === "Enter") $("#customAdd").click(); };
   $("#lastCustom").onclick = () => add(state.profile.lc);
 
+  // Bottle mode: drag or tap ¼ ½ ¾ Full, then Add
+  const slider = $("#bottleSlider");
+  const showAmount = () => { $("#bottleAmount").textContent = `${slider.value} ml`; };
+  $("#bottleOpen").onclick = () => {
+    const r = $("#bottleRow");
+    r.hidden = !r.hidden;
+    if (!r.hidden) { slider.max = state.profile.bottle; slider.value = Math.round(state.profile.bottle / 2 / 25) * 25; showAmount(); }
+  };
+  slider.oninput = () => { showAmount(); haptic("tick"); };
+  $$("[data-part]").forEach((b) => (b.onclick = () => {
+    slider.value = Math.round((state.profile.bottle * +b.dataset.part) / 25) * 25;
+    showAmount();
+  }));
+  $("#bottleAdd").onclick = () => {
+    const v = +slider.value;
+    if (v > 0) { add(v); $("#bottleRow").hidden = true; }
+  };
+
   // Undo: tap to undo, hold to clear the day (and tap again to restore)
   const u = $("#undo");
   let holdTimer = 0, held = false;
@@ -159,6 +187,7 @@ function wireHome() {
 
 function openTarget(target) {
   if (target === "settings:you") openSettings("you");
+  if (target === "history") $("#openHistory").click();
 }
 
 async function boot() {
@@ -178,7 +207,8 @@ async function boot() {
   store.onChange(() => reload());
   store.onOpen(openTarget);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) onResume(); });
-  setInterval(ensureToday, 60_000);
+  // Once a minute: catch a new day, and let caffeine wear off and the pace tip move on.
+  setInterval(() => { ensureToday(); render(); }, 60_000);
 
   if (!state.profile.onboarded) {
     startWelcome(() => { render(); syncGoal(); });
