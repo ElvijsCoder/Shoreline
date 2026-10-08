@@ -30,6 +30,12 @@ button,select,input{font:inherit;color:var(--foam)}
 background:#121212;box-shadow:0 0 0 #0000;transition:transform .12s,background .35s,box-shadow .35s,border-color .35s}
 .btn:active{transform:scale(.96);background:#1b1b1b}
 [hidden]{display:none!important}
+#hist{position:fixed;inset:0;z-index:5;background:#000;overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 28px}
+.hw{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.hh{display:flex;justify-content:space-between;align-items:center}.hh b{font-size:26px}
+header .btn.sm,.hh .btn.sm{flex:0 0 auto;padding:10px 28px}
+.btn.sm.on{color:var(--foam);border-color:#f3f3ef66}
+#hist svg{width:100%;display:block}
 .btn{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #drink{text-align:center;text-align-last:center}
@@ -49,7 +55,7 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
 <body>
 <canvas id="c" aria-hidden="true"></canvas>
 <main>
-  <header><b class="dot">Shoreline</b></header>
+  <header><b class="dot">Shoreline</b><button class="btn sm" id="hb">History</button></header>
   <div class="ringbox">
     <svg viewBox="0 0 300 300" id="ring" aria-hidden="true"></svg>
     <div class="mid" role="status" aria-live="polite">
@@ -93,6 +99,14 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
     <button class="btn sm" id="wxb">Update weather now</button>
   </div>
   <p class="log" id="log"></p>
+  <div id="hist" hidden><div class="hw">
+    <div class="hh"><b class="dot">History</b><button class="btn sm" id="hx">Close</button></div>
+    <div class="row"><button class="btn sm on" id="tw">Week</button><button class="btn sm" id="tm">Month</button></div>
+    <svg id="chart" viewBox="0 0 360 205" role="img" aria-label="Daily intake chart"></svg>
+    <p class="note" id="hs"></p>
+    <b class="dot" id="mn" style="font-size:20px"></b>
+    <svg id="cal" viewBox="0 0 360 260" role="img" aria-label="Month calendar"></svg>
+  </div></div>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -114,6 +128,8 @@ const wt=()=>{const a=new Date().getFullYear()-S.by,pal=PAL[S.act],ath=S.act===3
  return (S.bf>0?861.9*pal+37.34*S.kg*(1-S.bf/100)+4.288*S.rh+699.7*ath+0.514*S.alt-0.3625*a*a+29.42*a+1.937*t*t-23.15*t-984.8:1076*pal+14.34*S.kg+374.9*(S.sex==="m"?1:0)+5.823*S.rh+1070*ath+0.4726*S.alt-0.3529*a*a+24.78*a+1.865*t*t-19.66*t-713.1)+x};
 const goal=()=>Math.min(5500,Math.max(1000,Math.round(wt()*0.85*0.8/50)*50));
 const eff=()=>Math.round(S.log.reduce((a,e)=>a+e.ml*e.f,0));
+let H={};try{H=JSON.parse(localStorage.getItem("watr-hist-1"))||{}}catch(e){}
+function hsave(){if(eff()>0||H[S.day]){H[S.day]={e:eff(),g:goal()};try{localStorage.setItem("watr-hist-1",JSON.stringify(H))}catch(e){}}}
 const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
 
 // ring of dots
@@ -138,7 +154,7 @@ function render(){
  $("#left").textContent=e>=g?"goal reached":(g-e)+" ml left";
  $("#fact").textContent=FACTS[p>=1?4:p>=.75?3:p>=.5?2:p>=.25?1:0][new Date().getDate()%2];
  $("#log").textContent=S.log.length?S.log.length+" drinks · "+e+" of "+g+" ml":"Nothing logged yet today";
- save();lbl();sync();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
+ save();lbl();sync();hsave();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
 }
 function paint(){dots.forEach((d,i)=>d.setAttribute("fill",i<shown?"#f3f3ef":"#2c2c2c"));
  idots.forEach((d,i)=>d.setAttribute("fill",i<shownR?"#ff3b30":i<shown2?"#b4b4af":"#1e1e1e"))}
@@ -227,6 +243,30 @@ function sync(){const P=CP.Preferences,W=CP.WidgetRefresh;if(!P)return;
  Promise.all([P.set({key:"sl_day",value:S.day}),P.set({key:"sl_eff",value:""+eff()}),P.set({key:"sl_goal",value:""+goal()})]).then(()=>W&&W.refresh()).catch(()=>{})}
 async function pull(){const P=CP.Preferences;if(!P)return;
  try{const r=await P.get({key:"sl_pending"}),n=parseInt(r.value||"0");if(n>0){await P.set({key:"sl_pending",value:"0"});add(n,0,true)}}catch(e){}}
+let HM="w";
+function hist(){const NS="http://www.w3.org/2000/svg",n=HM==="w"?7:30,ds=[];
+ for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);ds.push(d.toLocaleDateString("sv-SE"))}
+ const vs=ds.map(k=>H[k]||null),mx=Math.max(goal(),...vs.map(v=>v?Math.max(v.e,v.g):0));
+ const mk=(svg,t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e};
+ const ch=$("#chart");ch.innerHTML="";const cw=360/n,rows=22,r=Math.min(cw*.3,5);
+ ds.forEach((k,i)=>{const v=vs[i],f=Math.round((v?v.e/mx:0)*rows),x=cw*i+cw/2;
+  for(let j=0;j<rows;j++)mk(ch,"circle",{cx:x,cy:176-j*(160/rows),r,fill:j<f?"#f3f3ef":"#1f1f1f"});
+  if(n===7)mk(ch,"text",{x,y:200,"text-anchor":"middle","font-size":11,fill:"#8d8d88"}).textContent=new Date(k+"T12:00").toLocaleDateString(undefined,{weekday:"short"})});
+ const gy=176-160*goal()/mx;mk(ch,"line",{x1:0,x2:360,y1:gy,y2:gy,stroke:"#f3f3ef88","stroke-dasharray":"3 5"});
+ const rc=vs.filter(Boolean);
+ $("#hs").textContent=rc.length?"Average "+Math.round(rc.reduce((a,v)=>a+v.e,0)/rc.length)+" ml a day, goal met "+rc.filter(v=>v.e>=v.g).length+" of "+rc.length+" days, best "+Math.max(...rc.map(v=>v.e))+" ml. Dashed line is today's goal.":"No data yet. Your history builds up from today.";
+ const now=new Date(),y=now.getFullYear(),m=now.getMonth(),off=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),cl=360/7;
+ $("#mn").textContent=now.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+ const cal=$("#cal");cal.innerHTML="";
+ "MTWTFSS".split("").forEach((c,i)=>mk(cal,"text",{x:cl*i+cl/2,y:12,"text-anchor":"middle","font-size":11,fill:"#8d8d88"}).textContent=c);
+ for(let d=1;d<=dim;d++){const idx=off+d-1,x=(idx%7)*cl+cl/2,yy=36+Math.floor(idx/7)*38,dt=new Date(y,m,d),v=H[dt.toLocaleDateString("sv-SE")],fr=v?v.e/v.g:null;
+  const fut=dt>now&&dt.toDateString()!==now.toDateString();
+  const [fc,rr]=fut?["#141414",3]:fr===null?["#1c1c1c",4]:fr<.5?["#4a4a4a",6]:fr<.8?["#8a8a86",7]:fr<1?["#cfcfca",8]:["#f3f3ef",9];
+  mk(cal,"circle",{cx:x,cy:yy,r:rr,fill:fc});
+  if(dt.toDateString()===now.toDateString())mk(cal,"circle",{cx:x,cy:yy,r:13,fill:"none",stroke:"#f3f3ef",opacity:.7})}}
+$("#hb").onclick=()=>{$("#hist").hidden=false;hist()};
+$("#hx").onclick=()=>{$("#hist").hidden=true};
+[["tw","w"],["tm","m"]].forEach(([id,k])=>$("#"+id).onclick=()=>{HM=k;$("#tw").classList.toggle("on",k==="w");$("#tm").classList.toggle("on",k==="m");hist()});
 addEventListener("resize",rs);rs();render();
 if(!reduce){P=0;loop()}else{P=target;draw()}
 nativeInit().then(()=>{wx();pull()});document.addEventListener("visibilitychange",()=>{if(!document.hidden){wx();plan();pull()}});
