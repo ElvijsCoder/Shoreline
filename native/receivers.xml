@@ -1,0 +1,2 @@
+<receiver android:name="app.shoreline.water.SmallWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_small_info"/></receiver>
+<receiver android:name="app.shoreline.water.WideWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_wide_info"/></receiver>

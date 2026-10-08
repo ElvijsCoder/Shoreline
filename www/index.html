@@ -104,7 +104,7 @@ const FACTS=[
  ["Pale yellow urine is a simple sign you are well hydrated.","Food supplies about a fifth of your daily water."],
  ["Kidneys clear roughly a litre an hour at most. Steady sipping beats chugging.","The body cannot bank extra water, so spread it across the day."],
  ["Goal reached. Extra water beyond this is mostly passed straight out.","Done for today. From here, thirst and urine colour are your guide."]];
-const KEY="watr-proto-1",today=new Date().toISOString().slice(0,10);
+const KEY="watr-proto-1",today=new Date().toLocaleDateString("sv-SE");
 let S={kg:75,sex:"m",by:1990,bf:"",act:1,temp:10,rh:60,alt:0,pr:0,day:today,log:[]};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r)S=Object.assign(S,r)}catch(e){}
 if(S.day!==today){S.day=today;S.log=[]}
@@ -138,7 +138,7 @@ function render(){
  $("#left").textContent=e>=g?"goal reached":(g-e)+" ml left";
  $("#fact").textContent=FACTS[p>=1?4:p>=.75?3:p>=.5?2:p>=.25?1:0][new Date().getDate()%2];
  $("#log").textContent=S.log.length?S.log.length+" drinks · "+e+" of "+g+" ml":"Nothing logged yet today";
- save();lbl();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
+ save();lbl();sync();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
 }
 function paint(){dots.forEach((d,i)=>d.setAttribute("fill",i<shown?"#f3f3ef":"#2c2c2c"));
  idots.forEach((d,i)=>d.setAttribute("fill",i<shownR?"#ff3b30":i<shown2?"#b4b4af":"#1e1e1e"))}
@@ -162,9 +162,9 @@ const buzz=p=>{const seq=Array.isArray(p)?p.map((d,i)=>i%2?Math.max(d,50):Math.m
  let t=0;seq.forEach((d,k)=>{if(k%2===0)setTimeout(()=>{try{H.vibrate({duration:d})}catch(e){}},t);t+=d})};
 
 DR.forEach(([n,f],i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;$("#drink").appendChild(o)});
-function add(ml){if(!(ml>0&&ml<=3000))return;const [n,f,c]=DR[$("#drink").value],before=eff()>=goal();
- S.log.push({ml,f,n,c});cleared=null;surge=.05;drop();
- buzz(!before&&eff()>=goal()?[20,60,20,60,40]:18);render()}
+function add(ml,di,q){if(!(ml>0&&ml<=3000))return;const [n,f,c]=DR[di===undefined?$("#drink").value:di],before=eff()>=goal();
+ S.log.push({ml,f,n,c});cleared=null;if(!q){surge=.05;drop()}
+ if(!q)buzz(!before&&eff()>=goal()?[20,60,20,60,40]:18);render()}
 document.querySelectorAll("[data-ml]").forEach(b=>b.onclick=()=>add(+b.dataset.ml));
 $("#cust").onclick=()=>{const r=$("#custrow");r.hidden=!r.hidden;if(!r.hidden)$("#cml").focus()};
 $("#cadd").onclick=()=>{add(+$("#cml").value);$("#cml").value=""};
@@ -209,7 +209,7 @@ async function nativeInit(){if(!LN)return;
  try{await LN.requestPermissions();
   await LN.createChannel({id:"drink",name:"Drink reminders",importance:4,sound:"drop.wav",vibration:true});
   await LN.registerActionTypes({types:[{id:"DRINK",actions:[{id:"add250",title:"+250 ml"},{id:"add500",title:"+500 ml"},{id:"custom",title:"Custom",input:true,inputButtonTitle:"Add",inputPlaceholder:"ml"}]}]});
-  LN.addListener("localNotificationActionPerformed",e=>{if(e.actionId==="add250")add(250);else if(e.actionId==="add500")add(500);else if(e.actionId==="custom")add(+e.inputValue);else if(e.notification.id===9001){$("#panel").classList.add("on");$("#kg").focus()}});
+  LN.addListener("localNotificationActionPerformed",e=>{if(e.actionId==="add250")add(250,0);else if(e.actionId==="add500")add(500,0);else if(e.actionId==="custom")add(+e.inputValue,0);else if(e.notification.id===9001){$("#panel").classList.add("on");$("#kg").focus()}});
   await LN.schedule({notifications:[{id:9001,channelId:"drink",title:"Update your weight",body:"A quick weight check keeps your goal accurate.",schedule:{on:{day:1,hour:9,minute:0},allowWhileIdle:true}}]});
   plan()}catch(e){}}
 async function wx(force){const st=m=>{const e=$("#wxs");if(e)e.textContent=m};
@@ -223,8 +223,12 @@ async function wx(force){const st=m=>{const e=$("#wxs");if(e)e.textContent=m};
   st("Weather updated "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));render()}
  catch(e){st("Weather failed: "+((e&&e.message)||JSON.stringify(e)))}}
 $("#wxb").onclick=()=>wx(true);
+function sync(){const P=CP.Preferences,W=CP.WidgetRefresh;if(!P)return;
+ Promise.all([P.set({key:"sl_day",value:S.day}),P.set({key:"sl_eff",value:""+eff()}),P.set({key:"sl_goal",value:""+goal()})]).then(()=>W&&W.refresh()).catch(()=>{})}
+async function pull(){const P=CP.Preferences;if(!P)return;
+ try{const r=await P.get({key:"sl_pending"}),n=parseInt(r.value||"0");if(n>0){await P.set({key:"sl_pending",value:"0"});add(n,0,true)}}catch(e){}}
 addEventListener("resize",rs);rs();render();
 if(!reduce){P=0;loop()}else{P=target;draw()}
-nativeInit().then(()=>wx());document.addEventListener("visibilitychange",()=>{if(!document.hidden){wx();plan()}});
+nativeInit().then(()=>{wx();pull()});document.addEventListener("visibilitychange",()=>{if(!document.hidden){wx();plan();pull()}});
 </script>
 </body></html>
