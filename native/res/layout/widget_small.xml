@@ -1,5 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:padding="8dp" android:background="@drawable/widget_bg">
-  <ImageView android:id="@+id/ring" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scaleType="fitCenter"/>
-  <TextView android:id="@+id/left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#8D8D88" android:textSize="12sp"/>
+<!-- 2x2: tap the ring to add your middle cup, UNDO takes back the last drink, tap elsewhere to open. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/ring"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/ring_press"
+        android:scaleType="fitCenter" />
+
+    <TextView
+        android:id="@+id/left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/space_grotesk"
+        android:textColor="#8D8D88"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/undo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/btn_bg"
+        android:contentDescription="Undo last drink"
+        android:fontFamily="@font/space_grotesk"
+        android:letterSpacing="0.15"
+        android:paddingStart="14dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="4dp"
+        android:text="UNDO"
+        android:textColor="#8D8D88"
+        android:textSize="10sp" />
 </LinearLayout>

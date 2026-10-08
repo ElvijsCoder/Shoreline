@@ -1,16 +1,16 @@
 {
   "name": "shoreline",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
   "dependencies": {
-    "@capacitor/android": "^7.0.0",
-    "@capacitor/cli": "^7.0.0",
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/geolocation": "^7.0.0",
-    "@capacitor/haptics": "^7.0.0",
-    "@capacitor/local-notifications": "^7.0.0",
-    "@capacitor/preferences": "^7.0.0",
-    "@capacitor/filesystem": "^7.0.0",
-    "@capacitor/share": "^7.0.0"
+    "@capacitor/android": "7.6.9",
+    "@capacitor/cli": "7.6.9",
+    "@capacitor/core": "7.6.9",
+    "@capacitor/filesystem": "7.1.9",
+    "@capacitor/share": "7.0.4"
   }
 }

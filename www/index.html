@@ -1,309 +1,169 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shoreline</title>
-
-<style>
-@font-face{font-family:"Doto";src:url(doto.woff2) format("woff2");font-weight:100 900}
-@font-face{font-family:"Space Grotesk";src:url(sg400.woff2) format("woff2");font-weight:400}
-@font-face{font-family:"Space Grotesk";src:url(sg500.woff2) format("woff2");font-weight:500}
-:root{--bg:#000;--foam:#f3f3ef;--dim:#8d8d88;--line:#303030;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
-body{background:#000;color:var(--foam);font:400 15px/1.45 "Space Grotesk",system-ui,sans-serif;overflow-x:hidden}
-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0}
-main{position:relative;z-index:1;max-width:440px;margin:0 auto;min-height:100%;padding:20px 20px 28px;display:flex;flex-direction:column;gap:20px}
-.dot{font-family:"Doto","Courier New",monospace;font-weight:900}
-header{display:flex;justify-content:space-between;align-items:baseline}
-header b{font-size:26px;letter-spacing:.08em}
-header span{color:var(--dim)}
-.ringbox{position:relative;width:min(78vw,320px);aspect-ratio:1;margin:4px auto 0}
-.ringbox svg{width:100%;height:100%}
-.mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22%}
-.mid .big{font-size:52px;line-height:1}
-.mid .sub{color:var(--dim);margin-top:6px}
-.fact{min-height:3.9em;text-align:center;color:#d6d6d1;max-width:34ch;margin:0 auto}
-.row{display:flex;gap:10px}
-button,select,input{font:inherit;color:var(--foam)}
-.btn{flex:1;padding:16px 0;border-radius:999px;border:1px solid #242424;cursor:pointer;
-background:#121212;box-shadow:0 0 0 #0000;transition:transform .12s,background .35s,box-shadow .35s,border-color .35s}
-.btn:active{transform:scale(.96);background:#1b1b1b}
-[hidden]{display:none!important}
-#hist{position:fixed;inset:0;z-index:5;background:#000;overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 28px}
-.hw{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-.hh{display:flex;justify-content:space-between;align-items:center}.hh b{font-size:26px}
-header .btn.sm,.hh .btn.sm{flex:0 0 auto;padding:10px 28px}
-.btn.sm.on{color:var(--foam);border-color:#f3f3ef66}
-#hist svg{width:100%;display:block}
-.btn{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#drink{text-align:center;text-align-last:center}
-*{-webkit-tap-highlight-color:transparent}
-.btn.glow{background:#1b1b1b;border-color:#f3f3efaa;box-shadow:0 0 22px #f3f3ef66}
-circle{transition:fill .3s}
-.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--foam);outline-offset:2px}
-.btn.sm{padding:10px 0;color:var(--dim)}
-select,input{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#0a0a0acc}
-.panel{border:1px solid var(--line);border-radius:18px;padding:16px;background:#050505dd;display:none;gap:12px;flex-direction:column}
-.panel.on{display:flex}
-label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
-.note{color:var(--dim);font-size:13px}
-.log{color:var(--dim);font-size:13px;text-align:center}
-@media (prefers-reduced-motion:reduce){.btn{transition:none}}
-</style></head>
+<link rel="stylesheet" href="css/style.css">
+</head>
 <body>
-<canvas id="c" aria-hidden="true"></canvas>
-<main>
-  <header><b class="dot">Shoreline</b><button class="btn sm" id="hb">History</button></header>
+<canvas id="shore" aria-hidden="true"></canvas>
+
+<main id="home">
+  <header>
+    <b class="dot">Shoreline</b>
+    <button class="btn sm pill" id="openHistory">History</button>
+    <button class="btn sm pill" id="openSettings">Settings</button>
+  </header>
+
   <div class="ringbox">
     <svg viewBox="0 0 300 300" id="ring" aria-hidden="true"></svg>
     <div class="mid" role="status" aria-live="polite">
       <div class="big dot" id="pct">0%</div>
       <div class="sub" id="left"></div>
-      <div class="sub" id="caf" style="font-size:12px;margin-top:2px"></div>
+      <div class="caf" id="caf"></div>
     </div>
   </div>
+
   <p class="fact" id="fact"></p>
-  <div id="chkw" hidden><p class="note" style="text-align:center;margin:0 0 8px">Morning check: urine colour?</p><div class="row"><button class="btn sm" data-u="1">Pale</button><button class="btn sm" data-u="2">Yellow</button><button class="btn sm" data-u="3">Dark</button></div></div>
-  <label>Drink
-    <select id="drink"></select>
-  </label>
-  <div class="row">
-    <button class="btn" data-ml="150">+150</button>
-    <button class="btn" data-ml="250">+250</button>
-    <button class="btn" data-ml="500">+500</button>
-    <button class="btn" id="cust">Custom</button>
-  </div>
-  <button class="btn sm" id="lc" hidden></button>
-  <div class="row" id="custrow" hidden>
-    <input id="cml" type="number" min="1" max="3000" inputmode="numeric" placeholder="ml">
-    <button class="btn" id="cadd" style="flex:0 0 38%">Add</button>
-  </div>
-  <div class="row">
-    <button class="btn sm" id="undo">Undo (hold to clear)</button>
-    <button class="btn sm" id="setup">Goal settings</button>
-  </div>
-  <div class="panel" id="panel">
-    <div class="g2">
-      <label>Sex<select id="sex"><option value="m">Male</option><option value="f">Female</option></select></label>
-      <label>Birth year<input id="by" type="number" min="1920" max="2012" inputmode="numeric"></label>
-      <label>Weight (kg)<input id="kg" type="number" min="30" max="200" inputmode="numeric"></label>
-      <label>Body fat % (optional)<input id="bf" type="number" min="5" max="60" inputmode="numeric" placeholder="optional"></label>
-      <label>Activity<select id="act"><option value="0">Mostly sitting</option><option value="1">Light movement</option><option value="2">Active</option><option value="3">Athlete / hard training</option></select></label>
-      <label>Temperature (°C)<input id="temp" type="number" min="-30" max="45" inputmode="numeric"></label>
-      <label>Humidity (%)<input id="rh" type="number" min="0" max="100" inputmode="numeric"></label>
-      <label>Altitude (m)<input id="alt" type="number" min="0" max="5000" inputmode="numeric"></label>
-      <label id="prl">Pregnancy / nursing<select id="pr"><option value="0">No</option><option value="1">Late pregnancy</option><option value="2">Nursing</option></select></label>
-      <label>Wake up<input id="wake" type="time"></label>
-      <label>Sleep<input id="slp" type="time"></label>
-      <label>Reminders every<select id="iv"><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></label>
-      <label>No caffeine after<input id="cut" type="time"></label>
+
+  <div id="check" hidden>
+    <p class="note" style="text-align:center;margin-bottom:8px">Morning check: urine colour?</p>
+    <div class="row">
+      <button class="btn sm" data-urine="1">Pale</button>
+      <button class="btn sm" data-urine="2">Yellow</button>
+      <button class="btn sm" data-urine="3">Dark</button>
     </div>
-    <p class="note" id="why"></p>
-    <p class="note" id="wxs"></p>
-    <p class="note">Sources: Yamada et al., Science 2022 (water turnover); EFSA 2015 (caffeine); Armstrong et al., J Nutr 2012 (mild dehydration). Other tips are general physiology.</p>
-    <button class="btn sm" id="wxb">Update weather now</button>
-    <div class="row"><button class="btn sm" id="bx">Export backup</button><button class="btn sm" id="bi">Import backup</button></div>
-    <input type="file" id="impf" accept="application/json,.json" hidden>
-    <p class="note" id="bst"></p>
+  </div>
+
+  <label>Drink <select id="drink"></select></label>
+
+  <div class="row" id="cups"></div>
+  <button class="btn sm" id="lastCustom" hidden></button>
+  <div class="row" id="customRow" hidden>
+    <input id="customMl" type="number" min="1" max="3000" inputmode="numeric" placeholder="ml" aria-label="Custom amount in ml">
+    <button class="btn" id="customAdd" style="flex:0 0 38%">Add</button>
+  </div>
+
+  <div class="row">
+    <button class="btn sm" id="undo" aria-description="Tap to undo the last drink. Hold to clear today.">Undo (hold to clear)</button>
   </div>
   <p class="log" id="log"></p>
-  <div id="hist" hidden><div class="hw">
-    <div class="hh"><b class="dot">History</b><button class="btn sm" id="hx">Close</button></div>
-    <div class="row"><button class="btn sm on" id="tw">Week</button><button class="btn sm" id="tm">Month</button></div>
-    <svg id="chart" viewBox="0 0 360 205" role="img" aria-label="Daily intake chart"></svg>
-    <p class="note" id="hs"></p>
-    <b class="dot" id="mn" style="font-size:20px"></b>
-    <svg id="cal" viewBox="0 0 360 260" role="img" aria-label="Month calendar"></svg>
-  </div></div>
 </main>
-<script>
-const $=s=>document.querySelector(s);
-const DR=[["Water",1,0],["Coffee",1,40],["Tea",1,20],["Diet cola",1,12],["Milk",1.1,0],["Juice",1.05,0]];
 
-const FACTS=[
- ["About 1.4% body water loss lowered mood and brought on headaches in a study of young women.","In young men, mild dehydration raised fatigue and tension and made mental tasks harder."],
- ["Water carries nutrients and helps cool you through sweat.","Roughly half or more of an adult's body weight is water."],
- ["Pale yellow urine is a simple sign you are well hydrated.","Food supplies about a fifth of your daily water."],
- ["Kidneys clear roughly a litre an hour at most. Steady sipping beats chugging.","The body cannot bank extra water, so spread it across the day."],
- ["Goal reached. Extra water beyond this is mostly passed straight out.","Done for today. From here, thirst and urine colour are your guide."]];
-const KEY="watr-proto-1",today=new Date().toLocaleDateString("sv-SE");
-let S={kg:75,sex:"m",by:1990,bf:"",act:1,temp:10,rh:60,alt:0,pr:0,wake:"08:00",slp:"22:30",cut:"14:00",iv:90,lc:0,adj:0,ck:[],day:today,log:[]};
-try{const r=JSON.parse(localStorage.getItem(KEY));if(r)S=Object.assign(S,r)}catch(e){}
-if(S.day!==today){S.day=today;S.log=[]}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const PAL=[1.4,1.6,1.8,2.2];
-const wt=()=>{const a=new Date().getFullYear()-S.by,pal=PAL[S.act],ath=S.act===3?1:0,t=S.temp,x=S.sex==="f"?[0,670,260][S.pr]:0;
- return (S.bf>0?861.9*pal+37.34*S.kg*(1-S.bf/100)+4.288*S.rh+699.7*ath+0.514*S.alt-0.3625*a*a+29.42*a+1.937*t*t-23.15*t-984.8:1076*pal+14.34*S.kg+374.9*(S.sex==="m"?1:0)+5.823*S.rh+1070*ath+0.4726*S.alt-0.3529*a*a+24.78*a+1.865*t*t-19.66*t-713.1)+x};
-const goal=()=>Math.min(5500,Math.max(1000,Math.round(wt()*0.85*0.8*(1+(S.adj||0))/50)*50));
-const cap=()=>S.sex==="f"&&S.pr>0?200:Math.min(400,Math.round(5.7*S.kg/10)*10);
-const hh=s=>{const a=String(s).split(":");return +a[0]+(+a[1]||0)/60};
-const eff=()=>Math.round(S.log.reduce((a,e)=>a+e.ml*e.f,0));
-let H={};try{H=JSON.parse(localStorage.getItem("watr-hist-1"))||{}}catch(e){}
-function hsave(){if(eff()>0||H[S.day]){H[S.day]={e:eff(),g:goal()};try{localStorage.setItem("watr-hist-1",JSON.stringify(H))}catch(e){}}}
-const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+<!-- History -->
+<section class="sheet" id="history" role="dialog" aria-modal="true" aria-labelledby="historyTitle" hidden>
+  <div class="in">
+    <div class="top"><b class="dot" id="historyTitle">History</b><button class="btn sm pill" data-close>Close</button></div>
+    <div class="streak"><span class="n dot" id="streak">0</span><span class="note" id="streakNote"></span></div>
+    <div class="row"><button class="btn sm on" id="rangeWeek">Week</button><button class="btn sm" id="rangeMonth">Month</button></div>
+    <svg id="chart" viewBox="0 0 360 205" role="img" aria-label="Daily intake chart"></svg>
+    <p class="note" id="summary"></p>
+    <b class="dot" id="monthName" style="font-size:20px"></b>
+    <svg id="cal" viewBox="0 0 360 260" role="img" aria-label="Month calendar. Tap a day to see or edit it."></svg>
+    <p class="note">Tap a day to see its drinks, remove one, or add one you forgot.</p>
+  </div>
+</section>
 
-// ring of dots
-const ring=$("#ring"),N=60,dots=[];
-for(let i=0;i<N;i++){const a=i/N*2*Math.PI-Math.PI/2,d=document.createElementNS("http://www.w3.org/2000/svg","circle");
- d.setAttribute("cx",150+122*Math.cos(a));d.setAttribute("cy",150+122*Math.sin(a));d.setAttribute("r",4.2);ring.appendChild(d);dots.push(d)}
+<!-- One day -->
+<section class="sheet" id="dayView" role="dialog" aria-modal="true" aria-labelledby="dayTitle" hidden>
+  <div class="in">
+    <div class="top"><b class="dot" id="dayTitle" style="font-size:22px"></b><button class="btn sm pill" data-close>Back</button></div>
+    <p class="note" id="daySummary"></p>
+    <div class="list" id="dayList"></div>
+    <div class="panel">
+      <b>Add a drink you forgot</b>
+      <div class="g2">
+        <label>Drink <select id="pastDrink"></select></label>
+        <label>Amount (ml) <input id="pastMl" type="number" min="1" max="3000" inputmode="numeric" value="250"></label>
+        <label>Time <input id="pastTime" type="time" value="12:00"></label>
+      </div>
+      <button class="btn" id="pastAdd">Add</button>
+    </div>
+  </div>
+</section>
 
-let P=0,target=0,surge=0,shown=0,want=0,shown2=0,want2=0,shownR=0,wantR=0;
-const M=40,idots=[],NS="http://www.w3.org/2000/svg",ig=document.createElementNS(NS,"g");
-ig.style.transition="opacity .6s";ig.style.opacity=0;ring.appendChild(ig);
-for(let i=0;i<M;i++){const a=i/M*2*Math.PI-Math.PI/2,d=document.createElementNS(NS,"circle");
- d.setAttribute("cx",150+106*Math.cos(a));d.setAttribute("cy",150+106*Math.sin(a));d.setAttribute("r",2.8);ig.appendChild(d);idots.push(d)}
-function render(){
- const g=goal(),e=eff(),p=e/g;target=Math.min(p,1);
- want=Math.round(N*Math.min(p,1));
- const cf=S.log.reduce((a,e)=>a+e.ml*(e.c||0)/100,0);want2=Math.round(M*Math.min(cf/cap(),1));wantR=Math.round(M*Math.min(Math.max(cf-cap(),0)/cap(),1));$("#caf").style.color=cf>cap()?"#ff3b30":"";
- ig.style.opacity=cf>0?1:0;$("#caf").textContent=cf>0?"caffeine "+Math.round(cf)+" / "+cap()+" mg":"";
- if(reduce){shown=want;shown2=want2;shownR=wantR}paint();
- $("#pct").textContent=Math.round(p*100)+"%";
- $("#prl").hidden=S.sex!=="f";
- $("#lc").hidden=!S.lc;$("#lc").textContent="+"+S.lc+" ml (last custom)";
- $("#chkw").hidden=!(new Date().getHours()<12&&!(S.ck||[]).some(x=>x.d===S.day));
- $("#why").textContent="Goal "+g+" ml. Based on a water turnover of about "+(wt()/1000).toFixed(1)+" L/day from the 2022 Yamada et al. Science equation. About 85% of turnover is water you take in, and I assume a fifth of that comes from food. The equation explains just under half of person-to-person variation, so treat it as a starting point."+(S.adj?" Your morning checks adjust it by "+Math.round(S.adj*100)+"%.":"")+" Caffeine limit "+cap()+" mg a day (EFSA 2015: 5.7 mg per kg of body weight, up to 400 mg, or 200 mg in pregnancy and nursing).";
- $("#left").textContent=e>=g?"goal reached":(g-e)+" ml left";
- $("#fact").textContent=tip(p,cf);
- $("#log").textContent=S.log.length?S.log.length+" drinks · "+e+" of "+g+" ml":"Nothing logged yet today";
- save();lbl();sync();hsave();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
-}
-function paint(){dots.forEach((d,i)=>d.setAttribute("fill",i<shown?"#f3f3ef":"#2c2c2c"));
- idots.forEach((d,i)=>d.setAttribute("fill",i<shownR?"#ff3b30":i<shown2?"#b4b4af":"#1e1e1e"))}
-setInterval(()=>{let m=0;if(shown!==want){shown+=shown<want?1:-1;m=1}
- if(shown2!==want2){shown2+=shown2<want2?1:-1;m=1}
- if(shownR!==wantR&&(shown2===M||shownR>wantR)){shownR+=shownR<wantR?1:-1;m=1}if(m)paint()},75);
-document.addEventListener("click",e=>{const b=e.target.closest(".btn");if(b){b.classList.add("glow");setTimeout(()=>b.classList.remove("glow"),380)}});
-// feedback
-const SND="data:audio/wav;base64,UklGRixeAABXQVZFZm10IBAAAAABAAEAgLsAAAB3AQACABAAZGF0YQheAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////////////////////////v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/8//z//P/8//3//f/8//z//P/8//z//P/8//z//P/8//3//f/9//z//f/9//z//P/8//z//P/8//z//f/8//z//P/9//z//P/8//z//P/8//z//P/9//3//f/9//z//P/8//z//P/9//3//P/8//z//P/8//z//P/9//3//P/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/9//3//f/+//3//v/9//3//f/9//7//f/+//3//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v/+//7//v////7//v/+/////v/+//7//v/+//7///////7//v/+//7//v////7//v/+//7//v/+/////v/+/////v/+//7//v///////v////7//v///////////////v/+/////////////////////v///////////////////wAAAAAAAP//////////AAD/////AAAAAP////8AAAAA//8AAP//AAAAAAAAAAAAAAAAAAAAAP///////////////wAAAAAAAAAA//////7//v/9//3//f/9//7//v//////AAD//wAA//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQABAAEAAQABAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAD///////8AAAAAAAD//wAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAAA//8AAAAAAAAAAP///////wAAAAAAAP//AAD//wAA//8AAP//AAD//wAAAAAAAAAAAAD//wAA/////////////wAAAAAAAAAA/////wAAAAAAAAAAAAD//wAAAAAAAAAAAAD//wAA//8AAAAA/////////////////v//////AAAAAP////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABAAEAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAAAAAABAAAAAAABAAAAAAAAAAAAAQAAAAAAAAAAAAEAAAAAAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAEAAQABAAAAAAABAAEAAQACAAEAAQAAAAAAAAAAAAAAAAD///////8AAAAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAIAAQAAAAAAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAEAAAABAAAAAQABAAEAAQABAAEAAgACAAIAAwACAAEAAQACAAMAAQACAAIAAgABAAIAAQABAAEAAQABAAEAAQABAAAAAQABAAEAAAABAAEAAAAAAAAAAAAAAAEAAQAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAQABAAEAAgABAAEAAAAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAAAAAAAEAAgABAAAAAQAAAAAAAAABAAAAAAD+/wAAAAD+//////8AAAAAAAABAAAAAAAAAAAA//8AAP7/AAD//wAA//8AAAAAAAD+/////v///////v////7/AAAAAAAAAQABAAAAAAAAAP////8AAAAAAAAAAAAAAAAAAAEAAQABAAAA/v/+//7//P/9//////8BAAEAAwADAAAAAAD9//v/+v/7//n/+v/9/wAAAQACAAMAAgAAAAAA/P/7//z/+v/9//3/AAACAAQABAADAAQAAgAAAP///P/8//3//f///wAAAAABAAIAAQAAAAAA///9///////9//7//v8BAAIAAwADAAQAAwAEAAEAAAD///7//f////7/AAABAAMAAwACAAIAAAAAAP7//f/+//3//f///wAAAgACAAMAAwABAAIAAQD+//7//v/+/wAAAAAAAAIAAQADAAMAAQABAAAAAAAAAAAA/v/+////AAAAAAEAAwADAAIAAQAAAP7//f/9//3//P/8//3//f8AAAAAAAAAAAAAAAD+//7//f/+//7//f/+//7/AAAAAAEAAQACAAIAAQABAAAA///+/wAAAAAAAAAAAgACAAMAAwADAAEAAgAAAAAA//8AAP///////wAAAAABAAAAAgACAAEAAAAAAAAAAAAAAAAAAAADAAQAAQABAAEAAAAAAAAA//8AAAAA//8AAAAAAAAAAAIAAgADAAIAAQAAAAAA/v/+//7///8AAAAAAQABAAEAAAABAAAAAQABAAAAAAAAAAAAAgACAAIAAQAAAAIAAQABAAIAAgAAAAEAAAAAAAAAAQABAAAAAgADAAEAAAAAAP///v/+//7///8AAAAAAAABAAIAAQABAAIAAgABAAAAAAAAAAEAAAACAAEAAgAFAAIAAgABAAEAAQAAAAAAAAD///3//v/8//7//v/9///////9/////v/+///////9/wAAAAAAAAAA/////wAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAAAAAIAAAABAAAAAAABAAMAAgADAAIABAAEAAMAAwADAAIAAgACAAAAAQADAAIAAwADAAQABAADAAIAAQABAAIAAQACAAEAAQAAAAAA//8AAAAAAgABAAEA/v8AAAAAAAD//wAAAQACAAAABAABAAEAAgAEAAMABAAEAAMAAQAAAAIAAAACAAIAAQAAAAEAAAAAAAAAAAAAAAAAAQABAAIAAQACAAEAAQABAAAAAAAAAAAA//8AAAAAAAABAAAAAQAAAAAA//8AAP7//v/+//7///8AAAAA//8AAAAAAAAAAP///v/9//3//f/9//3//f/9//7//v/9//3//P/+//7/AAD+/wAAAAD//wAA//////3//////////v/+//z//P/8//z////8//7//f/9//3//v/+//3////8//z//P////3//v/9///////+//3//v/9//3//v///wAA///+//7//v////7/AAD/////AAD9//3//f/9//3/AAD///3/AAAAAP7/AAAAAAAAAQAAAP3//P/7//3//P/9//3///8AAAAA//8AAAAAAAD+/////v/9//7/AQAAAP7/AAAAAAAAAQACAAIAAwADAAMAAwACAAAAAQAAAAEAAAAAAAAAAQADAAIAAwACAAEAAgACAAEAAAABAAQAAgACAAEAAQAAAAIAAQACAAQABAAGAAkACAAHAAUABgADAAcABwAGAAcABQAGAAUABgAHAAcACQAIAAkACAAFAAQABgAFAAYABQAFAAUABQAFAAQABwAFAAUABgAFAAQABAADAAMAAwACAAMAAwAFAAMAAgADAAMAAwADAAQABwAFAAUAAgADAAMAAgACAAEAAwAEAAQABQADAAIABAAFAAUABQAGAAcABQAHAAgABgAGAAcABgAGAAUABgAEAAQAAwAEAAcABQAGAAcAAwAEAAEAAQAAAP//AAD9/wAAAAAAAAAAAAAAAAMAAQACAAAAAQAAAP//AAD//wAAAAABAAEAAAABAAAA//8BAAAA//8AAAIAAgABAAQAAgACAAQAAgABAAEAAAAAAAIABAAAAAIAAQAAAAEAAAACAAEAAgAAAAAAAAAAAAAAAAAAAP//AAAAAAAA/v8AAP///P///////P8AAP7//P/9//3//P////z//f/8//7//P/8/wAAAAD+/wAAAAAAAAAAAAAAAP//AAD9//3//v/7//z//P/5//n/9//4//b/9v/3//X/9f/1//T/9f/y//H/8f/x/+//8P/w/+//8f/x//H/8f/w//H/8f/x//L/9P/0//P/8//y//D/7f/s/+r/5//l/+L/4f/d/9z/3f/e/9//2v/X/9r/3P/c/+X/7P/0//T/7v/v/+P/3f/c/97/4P/e/9z/0//N/8j/xf/E/8D/uf+u/6X/nP+U/5D/jP+L/4b/g/+D/4L/iP+J/43/kf+X/5//oP+m/6n/qv+r/6r/rP+r/63/r/+y/7b/t/+4/7z/vP++/7//vv+5/7r/tv+0/7L/sf+u/67/r/+y/7T/sP+y/7T/tv+3/7n/vf++/7//vv+//7//vf+5/7f/uf+2/7f/uP+2/7b/tf+0/7X/tP+z/7P/tP+x/7H/rv+r/63/sf+2/7z/vv/C/8P/xP/I/87/0v/X/97/5//t//P/+P/+/wEABQAGAAkADAAOAA4ADgANABEAEQARABAAEQATABEAEQAPAA4ADgALAAkABwAGAAUABgACAAEAAQAAAP///P/7//b/8P/Y/7n/r/+u/6v/sv+3/7z/vP+1/63/qf+t/7P/uf/B/8X/xP/E/7//uv+0/6X/pv+k/6T/pP+c/5X/jf+A/4T/iP+P/6X/qf+i/6T/mv+d/5r/lP+S/3z/VP9f/1X/S/9F/z7/Ov8t/yL/Ff8D//X+5f7X/sf+s/6h/o7+df5Y/jf+D/7c/c79yf3A/a39f/1c/Ub9F/27/ID8l/xa/Db8GPzo+6H7Tvv5+nL6Bfqv+Rz5ZfiF94b2V/Vs9J3z9fGz8IDvdO3S62Xqf+dC5S3iDd792SvTVcrFw1DCO8IRvci2yrVhtFyuLbHMt8q/xcG9w0TKvNhe5O7oL/SdBAYJJgtsGmgoPzCvOZ5BJEcsUNpWB1rfYMNoHGoVaO9sMnNUcnRugG5lbYxnl2KlYDlebljJUPdJ00EDOTwxTiqHJiMgThXoC48C3fve9ZfxAekB4J7Xdc94vSyfUJl+tJzce/PU9STkicUrqFWkoL5U4YP71gHy86nbzs370FPl0AAOFtIeAhuWD00H8wdxFAcowDhnQkNAwDenL9UuazZ4QjJN4lATTfxESj0IOUY5njxBQMdAzjzNNBsrISPOHt8d5x13HEgXnA7hBML8lfcB9dryWvDn693lJ9/62FHUttGD0GLQRs9dzPTIc8aOxWHGb8jbymHNl8/G0BbSLNR612fcuuHa5kjrHu+J8hn2R/qq/0kFVgqQDgoSDxXcF/Qamx7cIVQkhybhJ2koxij4KA4p3yhgKF4ngyX1Imog3x2PGkMXHBR9EI0MWQhEBBUAkPso94/yhe3v6Gvls+Ia4J/cVNj705DQs86LzRPM0cnNx//GQ8fix2zIpMhSySjLh8010AfT69UD2XvcWuAT5Lnn1utX8A31fPlI/c8AawRLCHwMEhD2EoMVCxhyGoccHB5JH2ogFyFmIXMhCSHuH4geGR2bG5cZMxewFPsR4A6JC9AHEwSWADH9q/ns9fvxC+5h6uHmoeOo4Nzd/9pp2ETWJ9Ry0jvRV9Coz1fPSs+wz5rQy9Hw0q3UvtYN2brbw97M4R/luuhH7Anw1vOW94L7ev8yA9UGSAqKDaQQvROOFuwYGhv1HHse0R/9INUhGiIMIr8hBSEHIPYepB0GHCca2BdBFWISZA9jDGgJVwYtA+7/evzf+Cb1w/HS7hHsN+lv5u7jluFk32vd29uj2vLZj9kz2eXYYNny2bvaItza3b3f6uFC5Mnmn+mr7N7vUPPJ9h76lf0kAYwELgiLC8MOzhG+FFcX2RkvHDoeAiCgIdYisSNOJIokhyROJNYjBCP8IasgCR8qHSAb3xh8FuQTKxFXDnALXwhFBQ4Cyf6R+2r4b/Wy8hzwr+1A6yLpNOdy5R7kNeOZ4k7iUOJ64vvi9uNR5SrneekD7LXulvE59N/2ufk7/MT+agHSAxMGjAi6CokMRQ70DzARUBJOExwUmRQoFYUVrRWVFWsVPhW3FEQUvRMXEyESLxFDEDQPGw4SDQ4M2QqsCZMITQcaBuIErwNyAhsB7f+i/mz9R/wr+yL6A/na99T23PXi9CT0gPPD8hTya/HP8FrwFvAB8AvwK/A58F3wwvA28ezx4/Lx8/H0EPZ098z4Qfr8+9L9pf97AWoDWgVUB1EJVAtLDTIPAxHGEnIUEhZ/F8QY5xnTGp4bRxy1HOwc8hynHDUcixujGpcZVBjLFiEVLhMIEb0OWAy6CS8HjwSwAdz+8/sV+UL2f/Po8HHuKez66fXnIOaO5GrjduLQ4YfhguGt4TDiGuNq5Azm7uf/6VTs7e628bv0/vdf+8j+NwKnBRcJkwzyDz0TYxZiGS4cwB7+IO0ilCQBJjAnAShoKHIoGyhbJ08m/SRfI3AhKR+SHK0ZhRY1E8APJwxqCKwE1gDr/A35RfWV8Rzuxuqh58LkIuLb3/DdQdz32hHak9mB2ejZndq22zPdCd8v4b/jnua06RDtqvB39IX4evxOACQE3geFCxcPoxIFFiQZ/ht2Hp4giSIoJIAlcyYOJzknAyd2JoglRSTBIv8g1x52HNAZ8BblE7IQTA3NCUQGvAIy/7L7R/jz9MXxrO7I6yLpseZ55JviEeHK393eP9723frdQ9743g/ga+EN4+/kEOdo6e7rpe6H8Y/0ovfN+vT9EAEcBB4HBgrODHYP9hE7FEcWEBiaGeYa5ButHCodWh1DHe0cVxyaG6wapBloGNwW5RSpEiMQiQ0EC7QIigZxBBACe/+7/NX5F/ek9Hvyj/De7kntuOs26uToyuf05mvmH+Yh5lrmzOZu51DoWumN6vrrke1N7zvxVPN69bj3//lF/IX+wQDjAgwFIwcsCSQL/QyoDiAQZBGCEmgTEBSwFAgVOhVKFRYVpxQEFD0TOhIPEdUPig4MDXILzwkICCcGSARpAoQApP7F/PP6MPl+9971XPTu8qTxePBy75Pu3O1M7fHsueyw7NfsHe2G7SXu8O7P79TwBPJM8630Hvad9zT5x/pp/A3+rv9AAdMCXQTLBSsHeQikCa8KoQt6DDINxQ1BDpgOwQ6+DqcOYg4DDoAN3gwjDFcLcgp4CWcIOAf4BbAEYgMTAsUAgP80/u/8sPt0+kH5Jvgh9y/2WfWV9PPzaPPv8pDyXPI98jjyXPKb8vLyY/Pw85n0TvUd9vz27vfn+On5+voL/Cv9TP5g/3QAgwGCAnsDcARWBSUG2QaDBx4InwgECWIJognCCc4JyQmoCXQJMwnVCFwI2AdFB6UG9QU9BXUEqwPQAvcBGAE8AFz/e/6r/dn8Cfw/+5P66flL+bn4N/jE92n3G/fk9rr2pPas9rz24PYN9133q/cR+Iz4Evmf+TP62fp7+yD80vyP/Uf+//60/2cAFQG8AWUC/QKNAxcElAQLBXcF1gUbBlwGjQanBr0Gxwa+Bq0GiAZPBg0GuwVjBQQFmAQbBKADGwOTAgICbgHRADwAov8L/3T+3f1R/cX8O/zA+0371/pq+hT6xvmK+Wj5U/k8+UL5VPli+Xz5qfnY+RH6WPqt+gr7c/vj+1f82fxc/eD9af71/n//CwCZACUBrQErAqoCIgOOA/UDWgS0BAIFRwWHBcAF4wUCBhMGEwYKBv4F5gW7BYoFSQX3BJ8ESQTiA3YDAgOJAgcCgAH8AHYA6v9f/9v+VP7T/Vj93/xq/Pz7lPs3++z6qvpy+j76Efr2+ef55vn9+Sb6U/qK+tb6JPt5++L7V/zQ/E/93P1y/g3/r/8/AMQARAHjAZsCQQPGAzkEsgRBBcoFPAaEBrAG3QYRB0oHdAeEB2gHQwcbB+UGoQZTBu8FdQUDBYsEAARiA8ACFQJpAcYAIgBy/77+CP5X/bv8JPyM+/76gfoX+rX5X/kV+db4oviK+I34oPi8+O34L/mA+dv5Rfq7+kD71vt4/Cb90/2J/j7/9P+vAGoBKgLhApwDRATjBHkFAAZ8BuoGSwecB9wHDQgsCDQILQgaCOsHqwdbB/8GiwYQBogF6wREBJED2AIbAlcBjwDE//v+L/5o/aX86Psy+4v67vlZ+dv4Z/gA+LT3dvdI9zH3LvdE92r3offr90L4s/g1+cD5YvoP+8n7h/xP/SX+8f7B/5cAbwFBAg0D1QOPBD0F4AV3BgIHgQfrB0AIfQipCL8IxAi3CJgIYQgYCLwHSwfEBjAGkwXjBCYEYgOWArwB4gAFACf/RP5o/ZL8v/v2+j/6j/no+FT40vdd9wH3u/aF9mr2Y/Zx9pP2y/YY93f37Pdz+Az5t/lt+jD7APzX/LX9mv6C/2gAUQE5AhED5QO4BHQFJgbTBmkH7gdiCMEICwk8CVsJYQlTCTQJAQm2CFQI4AdRB7QGCgZTBY4EwwPtAgoCHQEvAEj/W/5y/ZT8vPvr+iP6avm9+B34kvcd97z2dPZD9iL2GPYn9k32ifbb9kX3xPdU+Pb4pflm+jP7C/zo/NP9wf6x/6QAlgGCAmQDOwQQBdsFkgY+B9gHXgjLCCgJcwmhCcEJyQm2CY4JTwn/CJUIGgiIB+QGMAZyBagE0QPzAgwCGgErADz/Sf5f/YD8ofvQ+gr6T/mj+Aj4ffcK9632afY29iD2GvYs9lX2l/bv9mD34vd7+CX52/md+mz7Rvwo/Rf+B//3/+wA2QHFAqcDgQRRBRUGyQZuBwMIhgjwCEUJjAm4Cc4Jzwm9CYwJSQnzCIUIAQhtB8wGFgZUBYwEtAPTAu4BAgESACj/Pf5Y/Xf8ofvO+g76V/mx+B34n/cx99n2m/Zq9lX2VvZs9pr24PYz96P3Jvi6+GD5FPrV+qH7dPxW/T7+J/8RAPkA4AHBApwDaQQwBewFnAY6B8UHQAiiCPQIMQlZCW4JbAlUCSUJ3giGCBoInQcUB3oGzAUUBU8EggOqAsoB6wALAC//Uf54/af82vsW+176tfka+Y/4GPi192P3I/f29uD24Pbz9h33Yfe39xn4k/ge+bX5WfoP+9D7mPxn/T7+FP/r/8MAlgFlAi0D9QOxBFoF/gWTBhUHgwfhBzAIaAiQCKMIpgiUCG8IMAjjB4QHDwePBgMGaAXDBBUEXAObAtIBBwE5AHX/rf7q/Sz9b/y9+xf7fPru+XH5A/mh+FX4GPju99T3zPfd9wL4OviB+Nf4O/mw+Sz6vPpY+/77rvxk/SH+3f6c/1kAFwHSAYUCNQPdA3cECAWMBQEGZwa9BgkHQQdsB4YHjgeDB2cHOgf9BrIGVgbsBXYF8wRpBNUDOwOXAu4BQwGXAO7/Qf+X/vT9UP2x/B/8lfsX+6X6Qvrt+aD5Y/k4+Rn5B/kK+Rz5QPlz+bX5APpb+r76Mfuu+zX8xvxZ/fX9kP4t/8n/ZwAFAZ0BMwLHAlEDzgNFBLEEDgVjBawF5gUTBjMGRAZFBjoGHgb7BcwFkAVIBfEEjwQiBK8DMwO3AjQCrAElAZUABwB7/+7+a/7p/W39+vyM/CX8x/ty+yj75/q1+pD6dvpp+mn6evqP+rb65/oh+2T7r/sI/Gf80PxC/bX9L/6n/iX/ov8iAKEAHAGXAQsCeQLiAkIDnAPvAzgEeASyBN0E/gQSBRsFGQUQBf0E3QS2BIUERQQABLIDXgMDA6YCRQLfAXQBBQGTACAAsf9G/9/+ev4Z/r79Y/0O/cL8ffxB/BH86/vJ+7P7pvui+6r7t/vQ+/L7HfxS/I38z/wZ/Wz9v/0d/nr+2P47/53/AABiAMQAJgGBAd8BNAKFAtICGwNbA5IDwgPrAwwEIgQzBD4EPwQ0BCYECgToA78DjgNXAxYD1AKKAj4C6AGPATUB1gB4AB8AyP9s/xX/vf5j/hH+xP1+/T39CP3W/Kv8h/xp/E38Qvw+/EH8Tvxi/H/8nvzE/PL8Kf1o/a39+v1J/pj+7f5C/5j/8P9KAKMA/QBUAaYB9AFCAokCyQIHAz4DbQOTA7QDzgPeA+cD6QPkA9QDvQOeA3UDRQMTA9kClwJSAgcCtQFjAQ0BtgBcAAIAqP9P//T+oP5N/vn9sP1r/Sr97Py6/I/8afxP/Dz8LPwp/C/8O/xO/Gv8kPy7/PH8L/12/bz9CP5b/rH+BP9i/8L/HgB9ANsANgGPAeYBNwKDAs8CDwNLA4ADqwPLA+UD8AP+AwgE+QPqA90DqwOBA0sDFAPWApICOgLyAZ0BOAHgAHcAIAC4/1X/+f6W/kD+5f2V/Uf9/vy+/H/8UPwk/AT86vvc+9z74vvt+wL8I/xO/H78uvz+/Ej9l/3s/Ub+ov4G/23/1P88AKIABgFoAcgBJAJ6AssCFgNaA5cDyAPzAxUELgQ9BEUEQQQ1BB4E+QPMA5YDVQMQA8YCdQIdAr4BWQH1AI4AIgC7/1P/7P6J/ib+xP1q/Rb9y/yE/Ef8GPzt+8v7sPuk+5/7pPu6+9r7//sy/Gv8q/zz/ET9m/35/Vn+v/4n/5H//f9mANMAPwGnAQQCYQK5AgYDTwOPA8kD9gMbBDgESQRPBEwEPAQlBAIE2QOmA2cDIQPWAoECKQLMAW0BBQGcADAAyP9f//X+kP4w/tP9fP0m/dr8mvxf/C/8B/zo+9H7w/u9+8T71Pvv+xf8SPyF/Mb8Dv1b/a39B/5n/sz+Nf+e/wQAaADOADABkAHtAUcCmgLlAicDYAOTA8ED4AP4AwcEDgQGBPcD3gO8A48DWwMdA9sClAJCAukBjwEzAdUAdgATAK//S//q/o7+Of7n/ZX9TP0M/dP8nvx0/FP8Ofwr/Cf8LPw8/FD8bPyV/MX8+fw3/YH91f0o/oX+4/5F/6z/FgB+AOYASQGhAf0BSgKSAtECBgMsA0YDVwNUA0wDNwMZA/ACxQKJAk0CBwK/AXEBIwHZAIsAQgD4/7D/Zv8k/+b+rP50/kX+HP74/dz9x/28/bX9uv3C/cz94P33/RD+LP5M/mr+i/6r/sz+6P4F/xv/M/9K/2D/df+I/5j/rP++/9D/4v/4/w4AJQA/AFcAcACLAKAAuQDUAO4ABwEeATYBTQFlAX8BmAGwAcQB0QHdAegB7gHtAeoB3wHKAbABkQFqATwBBwHRAJQAWAAUANL/jP9G/wD/vv6A/kf+F/7s/cT9oP2B/Wb9UP1F/UH9Rv1S/Wf9hf2t/dr9Ef5Q/pT+3v4t/3v/yv8XAGYAsQD5ADoBcgGpAdgBAAIiAjkCTAJXAl4CWgJRAkQCMQIXAvgB1QGtAYABUwEiAfEAvgCIAFcAJADz/8b/nf93/1X/OP8f/wz/+/7x/un+5f7m/uj+6/7u/vH+9/74/vr+/v4B/wb/Cf8N/w//EP8U/xb/Gv8e/yP/J/8t/zH/OP8+/0j/VP9j/3L/h/+e/7f/0v/w/xQAPQBoAJQAwgDxAB4BSwF1AZ0BwQHlAQACGAIoAjMCNgIyAiYCFgL/AeEBvQGVAWUBLwH1ALcAdAAvAOf/nf9U/wn/xP6A/j/+A/7I/Zf9b/1Q/Tf9Kv0l/Sb9NP1M/Wr9kv3D/fX9L/5w/rD+9v4//4f/z/8VAFsAogDmACMBXgGTAcYB7wEUAjECSQJWAlwCXgJYAkoCMgIXAvoB1wGwAYcBWQErAf0AzQCiAHMASgAiAPz/1P+z/5H/dP9b/0H/Kv8V/wP/8v7j/tb+zP7H/r/+uv63/rT+t/65/rr+vP69/sH+xP7J/s/+1P7Z/uL+6/76/g3/If86/1b/cv+U/7n/4f8KADQAYQCSALsA6gAYAUYBcAGYAb4B4AECAhsCLwI/AkcCSwJJAkACMgIaAv0B2gGyAYABTAEPAdAAiwBEAP3/tv9v/yr/5/6o/m7+Of4C/sv9lv1o/UT9Lf0j/Sb9Mv1F/WP9iP22/e39K/5w/rj+A/9P/57/6/8yAHUAtADtAB4BSgFwAZEBqgHBAdQB4wHuAfQB9gH4AfQB7wHbAcoBtwGiAYMBXgEzAQkB3wCwAH4ATQAbAO3/wv+Z/3P/Vf88/yj/G/8U/w//Dv8S/xL/Gf8e/yP/Jv8p/yn/KP8j/xr/Ev8L/wP//P76/vj+9v77/gP/Df8d/yz/Qv9b/3X/kv+x/87/6/8FACQAQwBeAHsAmQC0AM4A6gAGARwBNgFNAWQBegGRAaIBrwG5Ab8BwAG9AbQBogGLAWsBRgEcAewAtwCBAEcACgDQ/5T/W/8l//T+xv6e/nn+W/5D/jL+J/4j/iX+Kf41/kP+VP5q/oP+nv67/tn++/4g/0n/c/+g/83/9/8iAFAAfgCqANMA+AAbATgBTgFgAW0BdwF4AXUBbQFeAU0BNAEaAQAB5QDIAKwAlAB7AGQATgA9AC0AIgAYAA8ACgAEAP//+f/z/+n/4f/Y/8//xf+7/6//pP+a/4//hf98/3b/cf9s/2n/Z/9k/1//X/9b/1j/Vf9P/0z/Sf9E/0L/Qf8//0P/SP9N/1z/bv+D/5z/u//a//z/IABFAGsAkQC1ANoA+gAbATUBTwFfAXIBfgGEAYUBgAF4AW4BXQFKATYBHgEEAecAyACmAIQAYQBAABgA8//L/6T/fv9a/zb/E//0/tb+vP6l/pT+iv6C/oL+iP6S/p/+tP7O/uX+Bf8l/0n/af+L/6//zf/v/w0AKgBDAFoAbQB8AI0AmwCpALUAwADIANIA1gDeAOMA6QDqAO4A7QDpAOMA2gDSAMgAvwCxAKQAmQCMAHsAbABfAE8ARAA4AC0AIgAaABIABwAAAPX/5//c/8z/vv+t/5n/iP9z/17/Sv81/yH/Df/9/u/+4/7c/tb+1/7a/uD+6v74/gj/G/81/1H/bv+M/6f/yP/q/wcAKgBOAHAAkwCyANQA8QAPASoBRAFYAWwBfgGMAZYBnAGaAZUBigF8AWUBTAEtAQsB5wDAAJcAaQA/ABEA5P+4/47/Zv9A/x3///7j/sr+t/6o/p/+l/6T/pT+l/6d/qb+s/7B/tT+6P7+/hb/Mv9N/2v/iv+q/8z/7f8OADAAUABtAIgAogC5AM0A4gDwAPwABQELAQ0BCwEIAQMB/AD1AO0A5ADbANIAxwC8ALEApgCZAI4AgABxAGIAUQA9ACoAGAAEAO//3P/H/7L/nP+H/3L/Xv9Q/z3/L/8h/xX/C/8C//r+9f7x/vH+7v71/vn+//4F/w3/Gv8r/zz/Tv9l/4D/m/+3/9P/9P8TADcAWgB9AJ8AwQDgAPwAFgEwAUIBUgFfAWcBawFrAWIBXAFQAUABLgEYAQEB5ADHAKcAiABkAEEAHQD6/9b/tP+P/2z/TP8v/xH/9v7f/sr+uv6t/qX+n/6g/qT+q/60/sL+1P7p/gP/HP86/1b/dv+X/7f/1f/x/w0AKABBAFkAbgCCAJQAoACvAL4AxwDRANcA2wDfAOAA3wDbANkA0QDKAMMAuQCsAKAAlQCGAHcAZgBWAEYANQAnABcACAD8/+//4f/U/8j/vf+0/6n/n/+U/4r/f/91/2v/Yf9W/0//Rv9A/zj/Nv8y/y7/MP8z/zj/Pv9G/1D/Xf9q/3r/jP+h/7b/yf/e//X/CAAfADYATQBiAHQAiQCbAK8AvwDMANsA5QDuAPUA+QD8APwA9gDyAOkA4QDSAL8ArgCWAH4AZABHACoADgDz/9f/uf+d/4X/b/9d/0r/Of8q/yD/Ff8P/wz/Cv8J/wz/Ev8Y/yP/Lv85/0n/Wf9q/33/j/+k/7f/zf/g//P/BQAaACwAPwBRAGAAbAB4AIAAiQCSAJUAmwCcAJ0AmwCaAJUAkACLAIQAfgB6AHMAawBlAF4AWQBRAEoAQgA7ADMAKwAgABYACwACAPf/7v/j/9r/zf/D/7r/sf+l/5v/kv+L/4L/ff93/3D/av9k/2L/Xv9e/13/YP9h/2b/bP90/3v/hv+S/5//rf+7/8z/3f/y/wQAGgAvAEQAWABsAIAAjwCfAK4AuQDFAM8A1QDZANsA2QDXANMAzQDEALoArgCeAI4AfABrAFcAQQAvABgABADw/93/yP+z/6H/j/98/2z/Xv9R/0f/Pf83/zL/Mf8x/zf/PP9D/0z/VP9h/2z/ev+K/5f/qf+6/8n/3P/s//n/CgAYACgANABDAE8AWgBnAHIAewCEAIoAkQCSAJQAlgCYAJgAmACWAJEAjQCHAIAAdwBxAGgAXgBSAEgAPwA6AC4AIwAXAA0AAAD0/+v/3v/V/8n/vf+y/6f/nf+U/4n/gf94/27/Zv9j/1v/Wf9W/1X/V/9a/17/Y/9q/3b/gf+O/5v/qv+4/8n/2//s////EQAlADcASQBeAG0AfQCNAJwAqQC2AMAAyQDQANUA1wDXANQA0wDKAMMAtwCqAJkAiQB1AGIATQA4ACQADAD2/97/yP+z/6H/j/99/2//Yf9U/0n/Qv88/zr/Of86/zz/Qf9G/07/VP9f/23/ef+I/5f/qf+7/8z/3v/y/wEAEwAmADUARQBTAGAAbQB4AIEAjACTAJcAmQCeAJ8AoQCiAKEAnwCaAJUAjwCFAH0AcwBrAGAAWQBPAEQAOwAuACQAFwAKAP//8f/l/9j/zf/B/7f/rf+f/5f/jf+F/33/eP90/2//av9p/2j/Z/9p/2r/b/90/33/g/+O/5f/ov+w/7z/y//Z/+j/+P8HABoAKgA7AEgAWgBpAHYAhQCPAJwApACtALQAtwC5ALcAtwCxAKwApQCcAJEAgwB2AGgAWABGADQAJAASAP//7P/Z/8j/tv+o/5f/if9+/3X/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EgAYABsAHwAhACUAJgAoACoALAAtADAALwAvAC4ALwAuACsAKQAnACUAIgAgAB0AGQAWABEADQAIAAQAAgD8//f/9P/w/+z/5//k/+L/3f/b/9n/1//V/9P/0v/S/9H/0v/T/9b/2P/a/93/4P/i/+b/6v/s//D/9v/6//7/AQAFAAoADwATABcAHAAfACIAJwApAC4ALwAwADIAMwAyADIAMQAxAC8ALQAqACcAJAAgABwAGQAVAA8ACgAFAAMA/P/6//b/8P/t/+j/5f/g/93/2v/Z/9f/1P/S/9L/0v/S/9H/0v/U/9X/1v/Y/9v/3f/h/+X/6f/u//L/9v/6//3/AQAGAAkADQASABUAGQAcAB4AIQAkACUAKAApACoAKwAtACwAKwArACsAKAAmACMAIQAeABsAGAAUABAADQAIAAQAAQD7//n/9f/x/+3/6f/l/+L/3v/c/9v/2f/V/9P/0//R/9L/0f/R/9L/0v/V/9f/2//c/9//4v/l/+n/7f/w//X/+v/+/wEABQAJAA0AEQAVABcAGgAcAB8AIgAmACcAKwApACkAKQAoACYAJgAjACEAHwAcABkAFAASAA4ACwAEAAEA/f/5//b/8f/t/+n/5f/j/9//3f/Z/9j/1//T/9P/1P/T/9P/1P/U/9b/2P/Z/93/3v/g/+P/5//q/+7/8f/1//f//P8AAAQABgALAA0AEAAUABcAGQAdAB8AIQAjACUAJQAlACYAJgAlACUAJgAnACUAJQAiACEAIQAfABwAGAAUABEACwAGAAAA/v/5//f/8//v/+//6//p/+f/5v/i/+H/4P/g/93/3f/d/93/3v/e/9//4f/i/+T/5//r/+7/8f/0//j/+////wMABAAKAA0AEAAUABcAGgAcAB8AIgAkACUAJgAmACgAJgAmACUAIwAjACIAIAAeABsAGQAYABMAEAAMAAgABgACAAAA+//3//T/8f/u/+v/6f/m/+T/4f/f/9//3f/a/9v/2//c/93/3//f/+H/4//m/+j/6v/s/+//8f/1//j//P///wEAAwAGAAgACwANABAAEwAVABYAGAAZABkAGwAdAB0AHAAdABwAHAAbABsAGAAXABUAEwAQAA8ADQAJAAgABQAAAP7/+//5//b/9f/z//H/7//t/+r/5//m/+X/4//j/+L/4v/h/+L/4//i/+T/5P/m/+f/6f/r/+z/7//x//P/9//5//3/AAABAAQABgAIAAoADQAPABEAEgAUABUAFgAXABgAGQAZABkAGgAZABgAFwAWABUAEwASAA4ADQALAAoABwAFAAIAAQD///v/+f/4//X/9P/y//D/7v/s/+v/6//q/+j/6P/n/+j/6P/n/+j/6//s/+z/7//w//L/9P/1//b/9//7//7///8BAAMABgAGAAkADAANAA4AEAARABIAEwATABQAFQAWABUAFgAWABYAFgAVABQAEwASABAADQANAAwACgAIAAcABAACAAAA/v/9//v/+f/3//b/9P/y//L/8f/w/+v/6//s/+z/6//s/+7/7f/t/+3/7//v//L/8//0//b/+P/6//r//f///wAAAgAEAAUACAAKAAsADAANAA4AEAASABIAEwATABUAFQAWABUAFgAVABQAFgAUABMAEQARAA8ADQAMAAsACQAHAAYABAACAAEA///+//z/+//5//f/9f/0//T/8v/x//H/8f/v/+//7//w//D/8f/x//L/8//0//T/9v/3//n/+//9//////8CAAIABAAGAAgACgALAAwADQAOAA8AEQARABMAEwAUABQAFQAVABUAFAATABMAEwARABEADwAMAAsACgAIAAYABQAEAAEA//////3/+//6//n/9//2//T/8v/y//H/8P/v/+//7//v/+//7v/v/+7/8P/w//L/8v/1//X/9//4//r//P/9/wAAAAABAAQABQAGAAgACgALAAwADQAPAA8AEAAQABEAEQARABEAEgASABEAEAAPAA4ADwANAA0ADAAJAAcACAAFAAUAAgAAAP///f/6//n/+f/2//X/9P/z//L/8f/x//D/7//v/+//7//w//D/8P/x//P/8//0//b/9v/3//n/+v/8//7/AAAAAAIAAgAEAAYABgAJAAsACwAMAA0ADQAOAA4ADwARABAAEAAQABAAEAAQABAADgAOAAwACwAJAAgABgAHAAQAAwABAAAA///9//z/+//6//j/9v/1//X/8//z//D/8P/v/+7/7v/u/+//8P/w//H/8P/x//L/8//0//X/9//5//r//P/+////AAABAAQABQAHAAgACQAKAAsADAANAA8ADgAPAA8ADwAQAA8ADwAPAA8ADgANAAsACwAKAAkACAAGAAUABAACAAAAAAD+//z/+v/6//j/9//2//b/9P/x//H/8P/w//D/7//v//D/7//v//D/8f/y//P/8//1//f/+P/5//r//P/9//7/AAAAAAEAAgAEAAYACAAIAAkACwALAA0ADAANAA0ADAAMAA0ADAALAAsACgAKAAoACQAJAAcABQAFAAQAAwACAAEAAAD///3//P/6//r/+f/3//X/9f/0//P/8//x//L/8v/y//L/8f/x//L/8v/z//T/9P/0//b/9//4//r/+v/9//3//v///wAAAQACAAMABQAGAAcACAAJAAsADAAMAA0ADQANAA0ADgAOAA0ADAALAAoACgAKAAkACAAHAAUABQADAAIAAAD//////f/9//z/+v/5//n/+P/3//b/9v/1//b/9f/2//b/9//2//b/9//3//f/+P/5//r/+v/7//3///8AAAEAAwAEAAUABgAGAAYABgAGAAUABQADAAEA///+//v/+//5//v//v/4//X/6//n//T/AQAAAPr/+P8AAAkADgANAAoACgAPABgAGwAaABUAFAAXABcAFQAOAAYAAAAAAAAA/v/4/+//6v/q/+z/7v/p/+X/5v/s//H/8//3//r//f8CAAcACwAOAA4ADgAPABMAEgATAA4ACQAHAAYAAgAAAPr/9f/x/+//7v/v/+3/6//o/+j/7f/x//X/9v/2//r/AQAHAAoACgAMABIAGAAeAB8AHQAaAB0AIQAiAB4AGAAVABQAEwAQAAsABQAAAP///f/8//j/8v/w//H/8v/w//D/7//w//P/9v/4//n//P///wAAAgAEAAYACAAGAAUABQADAAEAAAD+//r/+P/3//X/8f/v/+3/7P/u/+7/8f/z//X/+f/8/wAABAAIAA0AEgAWABkAHgAfACIAIwAjACIAIQAfAB4AGwAWABMADwAKAAYAAwAAAPz/+P/0//L/8P/u/+3/6//q/+v/6//s/+z/6//u//H/8//0//T/9f/3//n/+v/5//j/+P/4//r/+P/3//f/9v/2//j/9//3//f/+P/6//z//v8AAAAAAwAHAAkADQAQABMAFAAXABkAHAAeAB4AHgAdABwAHQAaABYAEgAOAAsACAADAAAA+f/2//L/7//s/+n/6P/l/+T/5f/n/+f/5//o/+r/7f/w//L/8//2//f/+f/7//z/+//7//v//P/8//z/+//6//v/+//7//r/+//8//7/AAACAAQABwAKAAwADwASABUAFwAZABoAGwAcABwAGwAaABgAFwAVABMAEAAMAAgABAABAP7/+//3//P/7//t/+z/6v/m/+X/5v/m/+b/5//o/+n/6//u/+//8v/0//b/9//6//v//f//////AAAAAAAAAAABAAEAAgADAAMABAAEAAUABgAIAAkACgAMAA0ADwARABIAEwAVABYAGAAYABgAFwAXABYAEwAQAA0ACwAIAAQAAQD9//n/9v/y//D/7f/r/+r/6f/p/+j/6f/p/+r/7P/u/+//8P/y//X/9//6//r//P/9//////8AAAAAAQACAAEAAgACAAMABAAEAAQABQAFAAcACAAJAAoADAAOAA4AEAAQABIAEgATABMAEwASABIAEAAOAAwACwAJAAcAAwABAAAA/v/6//f/9f/z//L/8f/v/+3/6//s/+z/7f/t/+7/7//x//P/9f/2//n/+v/7//3///8AAAAAAQABAAIAAgACAAMAAwADAAMAAwAEAAMABAAEAAYABgAHAAgACQAMAAwADgAQABAAEQARABEAEQAQAA4ADQALAAkABwAFAAMAAAD+//z/+v/3//b/9P/y//L/8P/w//D/8f/y//L/8v/0//b/+P/6//v//f//////AAAAAAAAAAABAAEAAAABAAEAAAAAAAAAAAAAAAEAAgACAAQABAAFAAcACAAJAAoACwALAAwADQAMAA0ADAAMAAsACgAJAAgABgAFAAQAAgAAAP///f/7//n/+P/2//X/9f/1//X/9f/2//f/9//5//n/+f/6//v//P/9//3//v/+//7//v/+//7//f/+//3//v/+//z//f/9//7//v///wAAAAAAAAIAAwAFAAYABwAIAAkACgAKAAoACgAKAAoACQAHAAYABQADAAMAAQAAAP///f/8//v/+v/5//n/+P/3//j/+P/5//r/+v/8//3//f/+//7//v///////v/+//7//v/9//3//P/8//v/+//6//r/+v/7//v/+//8//3///8AAAEAAQACAAQABAAFAAUABwAHAAcABwAGAAYABgAEAAQAAwACAAIAAQAAAAAAAAD///7///////7//v/+//3//v///////////wAAAAAAAAAA///+//7//f/9//z/+//6//r/+f/5//n/+P/5//n/+f/5//n/+v/7//z//f/+////AAAAAAAAAgACAAMABAAFAAQABQAFAAUABAAEAAMAAwACAAIAAgACAAEAAQABAAAAAAABAAAAAAABAAIAAQABAAEAAQABAAEAAQABAAAAAAD//////f/8//v/+v/6//n/+f/4//j/9//4//f/+P/4//n/+f/6//v//P/9//3//v///wAAAAABAAEAAQACAAIAAgACAAIAAgACAAMAAwADAAIAAgADAAIAAwAEAAQABAAFAAUABgAFAAUABQAFAAUABAAEAAMAAgABAAEAAAAAAP///v/9//z//P/8//v/+v/5//n/+f/5//j/+P/5//n/+f/6//v//P/8//3//v/+////AAAAAAAAAAABAAEAAQACAAIAAgADAAMABAAEAAQABAAFAAUABgAGAAYABgAHAAcACAAHAAcACAAHAAYABgAEAAQAAwADAAIAAgABAAAA//////7//f/8//z/+//7//r/+v/6//r/+v/7//v//P/8//z//P/8//7//f/+//7////+////AAAAAAAAAAAAAAAAAQABAAEAAgACAAMABAAFAAUABQAGAAYABwAHAAgACQAJAAgACAAHAAYABgAFAAQAAwACAAEAAAAAAAAA///+//7//f/8//z//P/8//z/+//7//v//P/8//z//P/8//z//P/8//z//P/8//3//f/9//3//f/+//7//v///wAAAAAAAAAAAQACAAIAAwAEAAQABQAFAAYABgAGAAYABwAGAAYABQAFAAUABAAEAAMAAgABAAAAAAAAAAAA///+//7//v/+//7//v/9//3//f/9//3//P/8//z//P/7//v/+//8//z//P/8//z//P/8//z//P/9//3//v////////8AAAAAAQABAAIAAgADAAMABAAEAAUABQAFAAUABAAFAAQABAADAAMAAwACAAIAAQABAAEAAQAAAAAAAAAAAAAAAAAAAP//AAD///////////7//v/+//3//f/9//3//P/8//z//P/8//z//P/9//3//v/+/////////wAAAAAAAAEAAQABAAIAAgACAAMAAwADAAMAAwADAAMAAwADAAMAAwADAAIAAgACAAIAAQACAAEAAgACAAIAAQACAAIAAQAAAAAAAAAAAAAAAAD////////+//7//f/9//3//f/9//3//P/9//3//v/9//7//v/+/////////wAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAIAAQABAAEAAQACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAQACAAEAAQAAAAAAAAAAAAAAAAAAAP////////7//v/+//7//v/+//7//v/+//7//v/+/////////////////////////wAA/////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAIAAgACAAIAAgACAAIAAgADAAIAAgACAAIAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////8AAP/////////////+//////////7//v/+//7//v/+//7/////////AAAAAAAAAAAAAAAAAQABAAIAAgABAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgABAAEAAQABAAEAAQABAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////v/+//7//f/+//7//v/9//7//v/+//7/////////AAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAEAAQACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAQABAAEAAQABAAEAAAAAAAAAAAAAAAAAAAAAAP/////////////+//7//v/+//7//v/+//7//v////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAQABAAEAAQACAAIAAgACAAIAAgACAAIAAgACAAIAAgABAAEAAQABAAEAAAAAAAAAAAAAAAAAAAAAAP//////////////////////////////////////////AAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAQABAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAQABAAEAAQABAAEAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAAAAAAD//wAA////////////////////////AAAAAAAAAAAAAAAAAAAAAAAAAQABAAEAAQABAAIAAgACAAIAAQACAAEAAQABAAEAAQABAAEAAQAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAQABAAAAAQAAAAAAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA////////////////AAD/////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAP////8AAP////8AAAAAAAAAAP///////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////wAA/////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-let ac,buf;
-function b2a(u){const b=atob(u.split(",")[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer}
-function drop(){try{ac=ac||new AudioContext();if(ac.state==="suspended")ac.resume();
- const play=()=>{const t=ac.currentTime,s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
-  s.buffer=buf;f.type="lowpass";f.frequency.value=2800;
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+.3);
-  s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t)};
- if(buf)play();else ac.decodeAudioData(b2a(SND)).then(b=>{buf=b;play()})}catch(e){}}
-const buzz=p=>{const seq=Array.isArray(p)?p.map((d,i)=>i%2?Math.max(d,50):Math.max(d,30)):[40];
- try{if(navigator.vibrate&&navigator.vibrate(seq))return}catch(e){}
- const H=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Haptics;if(!H)return;
- let t=0;seq.forEach((d,k)=>{if(k%2===0)setTimeout(()=>{try{H.vibrate({duration:d})}catch(e){}},t);t+=d})};
+<!-- Settings -->
+<section class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+  <div class="in">
+    <div class="top"><b class="dot" id="settingsTitle">Settings</b><button class="btn sm pill" data-close>Close</button></div>
 
-DR.forEach(([n,f],i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;$("#drink").appendChild(o)});
-function add(ml,di,q){if(!(ml>0&&ml<=3000))return;const [n,f,c]=DR[di===undefined?$("#drink").value:di],before=eff()>=goal();
- S.log.push({ml,f,n,c,t:Date.now()});if(c>0)S.cafSeen=true;cleared=null;if(!q){surge=.05;drop()}
- if(!q)buzz(!before&&eff()>=goal()?[20,60,20,60,40]:18);render()}
-document.querySelectorAll("[data-ml]").forEach(b=>b.onclick=()=>add(+b.dataset.ml));
-$("#cust").onclick=()=>{const r=$("#custrow");r.hidden=!r.hidden;if(!r.hidden)$("#cml").focus()};
-$("#cadd").onclick=()=>{const v=+$("#cml").value;if(v>0&&v<=3000)S.lc=v;add(v);$("#cml").value=""};
-$("#cml").onkeydown=e=>{if(e.key==="Enter")$("#cadd").click()};
-let ht,held=false,cleared=null;const ub=$("#undo");
-const lbl=()=>{ub.textContent=!S.log.length&&cleared?"Restore":"Undo (hold to clear)"};
-ub.onpointerdown=()=>{held=false;ub.classList.add("glow");ht=setTimeout(()=>{held=true;if(S.log.length){cleared=S.log.slice();S.log=[];buzz([40,80,40,80,120]);render()}},700)};
-const unhold=()=>{clearTimeout(ht);ub.classList.remove("glow")};
-ub.onpointerup=ub.onpointerleave=ub.onpointercancel=unhold;ub.oncontextmenu=e=>e.preventDefault();
-ub.onclick=()=>{if(held){held=false;return}
- if(!S.log.length&&cleared){S.log=cleared;cleared=null;buzz(40)}else if(S.log.pop())buzz([8,40,8]);render()};
-$("#setup").onclick=()=>$("#panel").classList.toggle("on");
-["sex","by","kg","bf","act","temp","rh","alt","pr","wake","slp","iv","cut"].forEach(k=>{const el=$("#"+k);el.value=S[k];
- el.onchange=()=>{if(["sex","wake","slp","cut"].includes(k))S[k]=el.value;else if(k==="bf"&&el.value==="")S.bf="";else if(el.value!==""&&!isNaN(+el.value))S[k]=+el.value;render()}});
+    <h2 id="you">YOU</h2>
+    <div class="g2" data-fields="you"></div>
 
-// shoreline canvas
-const c=$("#c"),x=c.getContext("2d");let w,h,t=0;
-function rs(){const d=devicePixelRatio||1;w=innerWidth;h=innerHeight;c.width=w*d;c.height=h*d;x.setTransform(d,0,0,d,0,0);draw()}
-function shore(y){return w*(.1+.72*(P+surge))+Math.sin(y/95+t)*18+Math.sin(y/38-t*1.7)*7}
-function draw(){
- x.clearRect(0,0,w,h);
- const g=x.createLinearGradient(0,0,w,0);g.addColorStop(0,"#202224");g.addColorStop(1,"#070707");
- x.beginPath();x.moveTo(0,0);for(let y=0;y<=h;y+=8)x.lineTo(shore(y),y);x.lineTo(0,h);x.closePath();x.fillStyle=g;x.fill();
- [[0,.9,9],[-16,.3,4],[-34,.12,3]].forEach(([o,a,lw])=>{
-  x.beginPath();for(let y=0;y<=h;y+=8){const sx=shore(y)+o+Math.sin(y/50+t*1.3+o)*4;y?x.lineTo(sx,y):x.moveTo(sx,y)}
-  x.strokeStyle="rgba(243,243,239,"+a+")";x.lineWidth=lw;x.shadowColor="#fff";x.shadowBlur=o?0:16;x.stroke();x.shadowBlur=0});
-}
-function loop(){t+=.012;P+=(target-P)*.04;surge*=.94;draw();requestAnimationFrame(loop)}
-const CP=(window.Capacitor&&Capacitor.Plugins)||{},LN=CP.LocalNotifications;
-async function plan(){if(!LN)return;
- try{const pend=await LN.getPending(),old=pend.notifications.filter(n=>n.id<9000);if(old.length)await LN.cancel({notifications:old});
-  if(S.cafSeen){const c=hh(S.cut);await LN.schedule({notifications:[{id:9002,channelId:"drink",title:"Caffeine cutoff",body:"Last call for caffeine today. Water from here is easier on your sleep.",schedule:{on:{hour:Math.floor(c),minute:Math.round(c%1*60)},allowWhileIdle:true}}]})}
- }catch(e){}}
-async function nativeInit(){if(!LN)return;
- try{await LN.requestPermissions();
-  await LN.createChannel({id:"drink",name:"Drink reminders",importance:4,sound:"drop.wav",vibration:true});
-  await LN.registerActionTypes({types:[{id:"DRINK",actions:[{id:"add250",title:"+250 ml"},{id:"add500",title:"+500 ml"},{id:"custom",title:"Custom",input:true,inputButtonTitle:"Add",inputPlaceholder:"ml"}]}]});
-  LN.addListener("localNotificationActionPerformed",e=>{if(e.actionId==="add250")add(250,0);else if(e.actionId==="add500")add(500,0);else if(e.actionId==="custom")add(+e.inputValue,0);else if(e.notification.id===9001){$("#panel").classList.add("on");$("#kg").focus()}});
-  await LN.schedule({notifications:[{id:9001,channelId:"drink",title:"Update your weight",body:"A quick weight check keeps your goal accurate.",schedule:{on:{day:1,hour:9,minute:0},allowWhileIdle:true}}]});
-  plan()}catch(e){}}
-async function wx(force){const st=m=>{const e=$("#wxs");if(e)e.textContent=m};
- if(force!==true&&Date.now()-(S.wxT||0)<4*3600e3)return;
- try{st("Updating weather...");const G=CP.Geolocation;
-  if(G){const pm=await G.requestPermissions({permissions:["coarseLocation"]});if(pm.location==="denied"&&pm.coarseLocation==="denied"){st("Location permission denied. Enter weather by hand or allow location in the app settings.");return}}
-  const pos=G?await G.getCurrentPosition({enableHighAccuracy:false,timeout:20000,maximumAge:3600000}):await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(r,j,{timeout:20000}));
-  const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&daily=temperature_2m_mean,relative_humidity_2m_mean&forecast_days=1&timezone=auto"),j=await r.json();
-  S.temp=Math.round(j.daily.temperature_2m_mean[0]);S.rh=Math.round(j.daily.relative_humidity_2m_mean[0]);S.alt=Math.max(0,Math.round(j.elevation||0));S.wxT=Date.now();
-  ["temp","rh","alt"].forEach(k=>$("#"+k).value=S[k]);
-  st("Weather updated "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));render()}
- catch(e){st("Weather failed: "+((e&&e.message)||JSON.stringify(e)))}}
-$("#wxb").onclick=()=>wx(true);
-function tip(p,cf){const now=new Date(),hn=now.getHours()+now.getMinutes()/60,w0=hh(S.wake),w1=hh(S.slp),exp=Math.min(1,Math.max(0,(hn-w0)/(w1-w0)));
- const hr=S.log.filter(e=>e.t&&Date.now()-e.t<3600e3).reduce((a,e)=>a+e.ml,0),last=S.log[S.log.length-1];
- const late=S.log.some(e=>{if(!(e.c>0&&e.t))return false;const d=new Date(e.t);return d.getHours()+d.getMinutes()/60>=hh(S.cut)});
- if(hr>1000)return "That is a lot in one hour. Kidneys clear about a litre an hour at most, so pause for a while.";
- if(p>1.5)return "Well past your goal. No more water is needed today.";
- if(cf>cap())return "You are over today's caffeine limit. Stick to water for the rest of the day.";
- if(last&&last.c>0&&Date.now()-last.t<6e5&&last.ml*last.c/100>Math.min(200,3*S.kg))return "That is a big single dose of caffeine. Up to about 200 mg at once is considered fine.";
- if(late)return "Caffeine this late can cost you sleep. Even 100 mg close to bedtime can affect it.";
- if(S.temp>=25&&p<1)return "Hot day: your goal is raised. Sip steadily rather than all at once.";
- if(p<1&&hn>w0&&hn<w1&&exp-p>.2)return "Behind pace for this time of day. A glass now catches you up.";
- return FACTS[p>=1?4:p>=.75?3:p>=.5?2:p>=.25?1:0][now.getDate()%2]}
-$("#lc").onclick=()=>add(S.lc);
-document.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{S.ck=(S.ck||[]).concat({d:S.day,v:+b.dataset.u}).slice(-7);
- const m=S.ck.reduce((a,x)=>a+x.v,0)/S.ck.length;S.adj=S.ck.length<3?0:m>=2.5?.1:m>=2.1?.05:m<=1.2?-.05:0;buzz(30);render()});
-function sync(){const P=CP.Preferences,W=CP.WidgetRefresh;if(!P)return;
- const hr=S.log.filter(e=>e.t&&Date.now()-e.t<3600e3).reduce((a,e)=>a+e.ml,0);
- Promise.all([["sl_day",S.day],["sl_eff",""+eff()],["sl_goal",""+goal()],["sl_wake",S.wake],["sl_slp",S.slp],["sl_iv",""+S.iv],["sl_pause",hr>1000?""+(Date.now()+2*3600e3):"0"]].map(([key,value])=>P.set({key,value}))).then(()=>W&&W.refresh()).catch(()=>{})}
-async function pull(){const P=CP.Preferences;if(!P)return;
- try{const r=await P.get({key:"sl_pending"}),n=parseInt(r.value||"0");if(n>0){await P.set({key:"sl_pending",value:"0"});add(n,0,true)}}catch(e){}}
-const bst=m=>{$("#bst").textContent=m};
-async function exportData(){const data=JSON.stringify({v:1,S,H}),F=CP.Filesystem,Sh=CP.Share;
- try{if(F&&Sh){const name="shoreline-backup-"+S.day+".json";await F.writeFile({path:name,data,directory:"CACHE",encoding:"utf8"});
-   const u=await F.getUri({path:name,directory:"CACHE"});await Sh.share({title:"Shoreline backup",files:[u.uri]});bst("Backup ready to save or send.")}
-  else{await navigator.clipboard.writeText(data);bst("Backup copied to the clipboard.")}}catch(e){bst("Export failed: "+((e&&e.message)||e))}}
-$("#bx").onclick=exportData;
-$("#bi").onclick=()=>$("#impf").click();
-$("#impf").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
- r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S&&!d.H)throw new Error("not a Shoreline backup");
-  Object.assign(H,d.H||{});if(d.S){["kg","sex","by","bf","act","temp","rh","alt","pr"].forEach(k=>{if(d.S[k]!==undefined)S[k]=d.S[k]});if(d.S.day===S.day&&Array.isArray(d.S.log))S.log=d.S.log}
-  try{localStorage.setItem("watr-hist-1",JSON.stringify(H))}catch(x){}
-  ["sex","by","kg","bf","act","temp","rh","alt","pr"].forEach(k=>$("#"+k).value=S[k]);render();bst("Imported "+Object.keys(d.H||{}).length+" days of history.")}
-  catch(x){bst("Import failed: "+x.message)}e.target.value=""};r.readAsText(f)};
-let HM="w";
-function hist(){const NS="http://www.w3.org/2000/svg",n=HM==="w"?7:30,ds=[];
- for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);ds.push(d.toLocaleDateString("sv-SE"))}
- const vs=ds.map(k=>H[k]||null),mx=Math.max(goal(),...vs.map(v=>v?Math.max(v.e,v.g):0));
- const mk=(svg,t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e};
- const ch=$("#chart");ch.innerHTML="";const cw=360/n,rows=22,r=Math.min(cw*.3,5);
- ds.forEach((k,i)=>{const v=vs[i],f=Math.round((v?v.e/mx:0)*rows),x=cw*i+cw/2;
-  for(let j=0;j<rows;j++)mk(ch,"circle",{cx:x,cy:176-j*(160/rows),r,fill:j<f?"#f3f3ef":"#1f1f1f"});
-  if(n===7)mk(ch,"text",{x,y:200,"text-anchor":"middle","font-size":11,fill:"#8d8d88"}).textContent=new Date(k+"T12:00").toLocaleDateString(undefined,{weekday:"short"})});
- const gy=176-160*goal()/mx;mk(ch,"line",{x1:0,x2:360,y1:gy,y2:gy,stroke:"#f3f3ef88","stroke-dasharray":"3 5"});
- const rc=vs.filter(Boolean);
- $("#hs").textContent=rc.length?"Average "+Math.round(rc.reduce((a,v)=>a+v.e,0)/rc.length)+" ml a day, goal met "+rc.filter(v=>v.e>=v.g).length+" of "+rc.length+" days, best "+Math.max(...rc.map(v=>v.e))+" ml. Dashed line is today's goal.":"No data yet. Your history builds up from today.";
- const now=new Date(),y=now.getFullYear(),m=now.getMonth(),off=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),cl=360/7;
- $("#mn").textContent=now.toLocaleDateString(undefined,{month:"long",year:"numeric"});
- const cal=$("#cal");cal.innerHTML="";
- "MTWTFSS".split("").forEach((c,i)=>mk(cal,"text",{x:cl*i+cl/2,y:12,"text-anchor":"middle","font-size":11,fill:"#8d8d88"}).textContent=c);
- for(let d=1;d<=dim;d++){const idx=off+d-1,x=(idx%7)*cl+cl/2,yy=36+Math.floor(idx/7)*38,dt=new Date(y,m,d),v=H[dt.toLocaleDateString("sv-SE")],fr=v?v.e/v.g:null;
-  const fut=dt>now&&dt.toDateString()!==now.toDateString();
-  const [fc,rr]=fut?["#141414",3]:fr===null?["#1c1c1c",4]:fr<.5?["#4a4a4a",6]:fr<.8?["#8a8a86",7]:fr<1?["#cfcfca",8]:["#f3f3ef",9];
-  mk(cal,"circle",{cx:x,cy:yy,r:rr,fill:fc});
-  if(dt.toDateString()===now.toDateString())mk(cal,"circle",{cx:x,cy:yy,r:13,fill:"none",stroke:"#f3f3ef",opacity:.7})}}
-$("#hb").onclick=()=>{$("#hist").hidden=false;hist()};
-$("#hx").onclick=()=>{$("#hist").hidden=true};
-[["tw","w"],["tm","m"]].forEach(([id,k])=>$("#"+id).onclick=()=>{HM=k;$("#tw").classList.toggle("on",k==="w");$("#tm").classList.toggle("on",k==="m");hist()});
-addEventListener("resize",rs);rs();render();
-if(!reduce){P=0;loop()}else{P=target;draw()}
-nativeInit().then(()=>{wx();pull()});document.addEventListener("visibilitychange",()=>{if(!document.hidden){wx();plan();pull()}});
-</script>
-</body></html>
+    <h2>WEATHER</h2>
+    <div data-fields="weatherToggle"></div>
+    <div class="g2" data-fields="weather"></div>
+    <button class="btn sm" id="weatherNow">Update weather now</button>
+    <p class="note" id="weatherStatus"></p>
+
+    <h2>YOUR DAY</h2>
+    <div class="g2" data-fields="day"></div>
+    <div data-fields="reminders"></div>
+    <p class="note" id="notifStatus"></p>
+    <button class="btn sm" id="notifAllow" hidden>Allow notifications</button>
+
+    <h2>CUPS &amp; DRINKS</h2>
+    <p class="note">Your three quick-add buttons. The middle and large cups are also on the widgets, tile and reminders.</p>
+    <div class="g2" data-fields="cups"></div>
+    <div class="list" id="drinkList"></div>
+    <div class="panel">
+      <b>Add your own drink</b>
+      <div class="g2">
+        <label>Name <input id="newDrinkName" maxlength="24" placeholder="Espresso"></label>
+        <label>Caffeine (mg per 100 ml) <input id="newDrinkCaf" type="number" min="0" max="500" inputmode="numeric" value="0"></label>
+      </div>
+      <button class="btn sm" id="newDrinkAdd">Add drink</button>
+    </div>
+
+    <h2>BACKUP</h2>
+    <div class="row"><button class="btn sm" id="exportBtn">Export backup</button><button class="btn sm" id="importBtn">Import backup</button></div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <p class="note" id="backupStatus"></p>
+
+    <h2>ABOUT YOUR GOAL</h2>
+    <p class="note" id="why"></p>
+    <p class="note">Sources: Yamada et al., Science 2022 (water turnover); EFSA 2010 (water in pregnancy and nursing); EFSA 2015 (caffeine); Armstrong et al., J Nutr 2012 (mild dehydration). Other tips are general physiology.</p>
+    <p class="note"><b>Not medical advice.</b> If you have a heart or kidney condition, or a doctor has told you to limit fluids, use the fluid limit under YOU and follow their advice.</p>
+  </div>
+</section>
+
+<!-- First run -->
+<section class="sheet" id="welcome" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" hidden>
+  <div class="in">
+    <div class="dots" id="welcomeDots" aria-hidden="true"></div>
+    <div class="step" data-step="0">
+      <h1 id="welcomeTitle">SHORELINE</h1>
+      <p>A calm way to drink enough water. Your goal is worked out from your body, your day and the weather, and the tide rises as you drink.</p>
+      <p class="note">Takes a minute. Everything stays on your phone.</p>
+    </div>
+    <div class="step" data-step="1" hidden>
+      <h1>YOU</h1>
+      <p>This sets your daily goal. You can change it any time in Settings.</p>
+      <div class="g2" data-fields="welcomeYou"></div>
+    </div>
+    <div class="step" data-step="2" hidden>
+      <h1>YOUR DAY</h1>
+      <p>Reminders only come while you're awake, and back off when you're ahead.</p>
+      <div class="g2" data-fields="welcomeDay"></div>
+    </div>
+    <div class="step" data-step="3" hidden>
+      <h1>REMINDERS</h1>
+      <p>Shoreline nudges you when you fall behind, with buttons to log a drink straight from the notification.</p>
+      <button class="btn" id="welcomeNotif">Allow notifications</button>
+      <p class="note" id="welcomeNotifStatus"></p>
+      <h1 style="margin-top:12px">WEATHER</h1>
+      <p>Hot or humid days need more water. With your rough location (about 1 km), Shoreline fetches the day's temperature from Open-Meteo. No account, nothing else is sent.</p>
+      <button class="btn sm" id="welcomeWeather">Use weather</button>
+      <p class="note" id="welcomeWeatherStatus"></p>
+    </div>
+    <div class="row">
+      <button class="btn sm" id="welcomeBack" hidden>Back</button>
+      <button class="btn" id="welcomeNext">Start</button>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

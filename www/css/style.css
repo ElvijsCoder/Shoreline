@@ -1,0 +1,94 @@
+/* Shoreline: black, foam white, one red accent (caffeine over the limit). */
+@font-face { font-family: "Doto"; src: url(../doto.woff2) format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Space Grotesk"; src: url(../sg400.woff2) format("woff2"); font-weight: 400; }
+@font-face { font-family: "Space Grotesk"; src: url(../sg500.woff2) format("woff2"); font-weight: 500; }
+
+:root {
+  --bg: #000; --foam: #f3f3ef; --dim: #8d8d88; --line: #303030; --panel: #050505dd; --red: #ff3b30;
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--foam); font: 400 15px/1.45 "Space Grotesk", system-ui, sans-serif; overflow-x: hidden; }
+[hidden] { display: none !important; }
+
+canvas#shore { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+main { position: relative; z-index: 1; max-width: 440px; margin: 0 auto; min-height: 100%; padding: 20px 20px 28px; display: flex; flex-direction: column; gap: 18px; }
+.dot { font-family: "Doto", "Courier New", monospace; font-weight: 900; }
+
+header { display: flex; align-items: center; gap: 8px; }
+header b { font-size: 26px; letter-spacing: .08em; flex: 1; }
+
+/* The ring */
+.ringbox { position: relative; width: min(78vw, 320px); aspect-ratio: 1; margin: 4px auto 0; }
+.ringbox svg { width: 100%; height: 100%; }
+.ringbox circle { transition: fill .3s; }
+.mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 22%; }
+.mid .big { font-size: 52px; line-height: 1; }
+.mid .sub { color: var(--dim); margin-top: 6px; }
+.mid .caf { font-size: 12px; margin-top: 2px; color: var(--dim); }
+.mid .caf.over { color: var(--red); }
+.fact { min-height: 3.9em; text-align: center; color: #d6d6d1; max-width: 34ch; margin: 0 auto; }
+
+/* Buttons */
+.row { display: flex; gap: 10px; }
+button, select, input { font: inherit; color: var(--foam); }
+.btn { flex: 1; padding: 16px 0; border-radius: 999px; border: 1px solid #242424; cursor: pointer; background: #121212;
+  transition: transform .12s, background .35s, box-shadow .35s, border-color .35s; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.btn:active { transform: scale(.96); background: #1b1b1b; }
+.btn.glow { background: #1b1b1b; border-color: #f3f3efaa; box-shadow: 0 0 22px #f3f3ef66; }
+.btn.sm { padding: 10px 0; color: var(--dim); }
+.btn.pill { flex: 0 0 auto; padding: 10px 18px; }
+.btn.on { color: var(--foam); border-color: #f3f3ef66; }
+.btn:disabled { opacity: .4; }
+.btn:focus-visible, select:focus-visible, input:focus-visible, .tog:focus-visible { outline: 2px solid var(--foam); outline-offset: 2px; }
+
+select, input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: #0a0a0acc; }
+label { display: flex; flex-direction: column; gap: 4px; color: var(--dim); }
+#drink { text-align: center; text-align-last: center; }
+.note { color: var(--dim); font-size: 13px; margin: 0; }
+.log { color: var(--dim); font-size: 13px; text-align: center; margin: 0; }
+
+/* Full-screen sheets: history, settings, onboarding */
+.sheet { position: fixed; inset: 0; z-index: 5; background: #000; overflow: auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 28px); }
+.sheet .in { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.sheet .top { display: flex; justify-content: space-between; align-items: center; }
+.sheet .top b { font-size: 26px; }
+.sheet h2 { font-family: "Doto", monospace; font-weight: 900; font-size: 20px; margin: 18px 0 0; letter-spacing: .04em; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.panel { border: 1px solid var(--line); border-radius: 18px; padding: 16px; background: var(--panel); display: flex; flex-direction: column; gap: 12px; }
+
+/* Deck-style switch: a little light plus ON/OFF, like Black Sand */
+.tog { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px;
+  border: 1px solid var(--line); background: #0a0a0acc; cursor: pointer; text-align: left; width: 100%; }
+.tog .t { display: flex; flex-direction: column; }
+.tog .t small { color: var(--dim); font-size: 12px; }
+.tog .s { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .15em; color: var(--dim); flex: 0 0 auto; }
+.tog .s i { width: 8px; height: 8px; border-radius: 50%; background: #333; transition: background .25s, box-shadow .25s; }
+.tog[aria-checked="true"] .s { color: var(--foam); }
+.tog[aria-checked="true"] .s i { background: var(--foam); box-shadow: 0 0 8px #f3f3efaa; }
+
+/* History */
+#chart, #cal { width: 100%; display: block; }
+.streak { display: flex; align-items: baseline; gap: 10px; }
+.streak .n { font-size: 48px; line-height: 1; }
+.list { display: flex; flex-direction: column; }
+.item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #151515; }
+.item .w { flex: 1; display: flex; flex-direction: column; }
+.item .w small { color: var(--dim); font-size: 12px; }
+.x { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid #242424; background: #0d0d0d; color: var(--dim); cursor: pointer; }
+
+/* Onboarding */
+.step { display: flex; flex-direction: column; gap: 14px; }
+.step h1 { font-family: "Doto", monospace; font-weight: 900; font-size: 34px; margin: 0; letter-spacing: .04em; }
+.step p { margin: 0; color: #d6d6d1; }
+.dots { display: flex; gap: 6px; justify-content: center; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: #333; }
+.dots i.on { background: var(--foam); }
+
+@media (prefers-reduced-motion: reduce) { .btn, .tog .s i, .ringbox circle { transition: none; } }

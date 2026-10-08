@@ -1,0 +1,4 @@
+<resources>
+    <string name="widget_small_desc">Tap the ring to log a drink. Undo underneath.</string>
+    <string name="widget_wide_desc">Your progress with two quick-add cups and undo.</string>
+</resources>
