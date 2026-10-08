@@ -9,6 +9,7 @@ public class WidgetPlugin extends Plugin {
   @PluginMethod
   public void refresh(PluginCall call) {
     WidgetBase.refresh(getContext(), -1);
+    Scheduler.schedule(getContext());
     call.resolve();
   }
 }

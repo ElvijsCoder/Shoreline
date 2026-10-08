@@ -226,16 +226,6 @@ function loop(){t+=.012;P+=(target-P)*.04;surge*=.94;draw();requestAnimationFram
 const CP=(window.Capacitor&&Capacitor.Plugins)||{},LN=CP.LocalNotifications;
 async function plan(){if(!LN)return;
  try{const pend=await LN.getPending(),old=pend.notifications.filter(n=>n.id<9000);if(old.length)await LN.cancel({notifications:old});
-  const left=goal()-eff();if(left<=0)return;
-  const w0=hh(S.wake),w1=hh(S.slp)-.5,iv=(S.iv||90)*60000,now=new Date(),hn=now.getHours()+now.getMinutes()/60,exp=Math.min(1,Math.max(0,(hn-w0)/(w1-w0)));
-  const hr=S.log.filter(e=>e.t&&Date.now()-e.t<3600e3).reduce((a,e)=>a+e.ml,0);
-  let t=new Date(now.getTime()+iv);if(eff()/goal()>exp+.1)t=new Date(t.getTime()+iv);if(hr>1000)t=new Date(t.getTime()+2*3600e3);
-  const out=[],setW=()=>t.setHours(Math.floor(w0),Math.round(w0%1*60),0,0);
-  while(out.length<6){const h=t.getHours()+t.getMinutes()/60;
-   if(h<w0)setW();else if(h>w1){t.setDate(t.getDate()+1);setW()}
-   out.push({id:100+out.length,channelId:"drink",title:"Time for water",body:left+" ml left today",schedule:{at:new Date(t),allowWhileIdle:true},actionTypeId:"DRINK"});
-   t=new Date(t.getTime()+iv)}
-  await LN.schedule({notifications:out});
   if(S.cafSeen){const c=hh(S.cut);await LN.schedule({notifications:[{id:9002,channelId:"drink",title:"Caffeine cutoff",body:"Last call for caffeine today. Water from here is easier on your sleep.",schedule:{on:{hour:Math.floor(c),minute:Math.round(c%1*60)},allowWhileIdle:true}}]})}
  }catch(e){}}
 async function nativeInit(){if(!LN)return;
@@ -271,7 +261,8 @@ $("#lc").onclick=()=>add(S.lc);
 document.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{S.ck=(S.ck||[]).concat({d:S.day,v:+b.dataset.u}).slice(-7);
  const m=S.ck.reduce((a,x)=>a+x.v,0)/S.ck.length;S.adj=S.ck.length<3?0:m>=2.5?.1:m>=2.1?.05:m<=1.2?-.05:0;buzz(30);render()});
 function sync(){const P=CP.Preferences,W=CP.WidgetRefresh;if(!P)return;
- Promise.all([P.set({key:"sl_day",value:S.day}),P.set({key:"sl_eff",value:""+eff()}),P.set({key:"sl_goal",value:""+goal()})]).then(()=>W&&W.refresh()).catch(()=>{})}
+ const hr=S.log.filter(e=>e.t&&Date.now()-e.t<3600e3).reduce((a,e)=>a+e.ml,0);
+ Promise.all([["sl_day",S.day],["sl_eff",""+eff()],["sl_goal",""+goal()],["sl_wake",S.wake],["sl_slp",S.slp],["sl_iv",""+S.iv],["sl_pause",hr>1000?""+(Date.now()+2*3600e3):"0"]].map(([key,value])=>P.set({key,value}))).then(()=>W&&W.refresh()).catch(()=>{})}
 async function pull(){const P=CP.Preferences;if(!P)return;
  try{const r=await P.get({key:"sl_pending"}),n=parseInt(r.value||"0");if(n>0){await P.set({key:"sl_pending",value:"0"});add(n,0,true)}}catch(e){}}
 const bst=m=>{$("#bst").textContent=m};

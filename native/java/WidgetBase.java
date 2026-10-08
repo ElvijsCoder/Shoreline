@@ -87,6 +87,13 @@ public abstract class WidgetBase extends AppWidgetProvider {
       for (int id : m.getAppWidgetIds(new ComponentName(c, w.getClass()))) w.draw(c, m, id, shown);
   }
 
+  static void commit(Context c, int ml) {
+    SharedPreferences p = sp(c); int[] st = state(c);
+    int pend = parse(p.getString("sl_pending", "0"), 0) + ml;
+    p.edit().putString("sl_day", today()).putString("sl_eff", "" + (st[0] + ml)).putString("sl_pending", "" + pend).commit();
+    refresh(c, -1); Scheduler.schedule(c);
+  }
+
   @Override public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
     for (int id : ids) draw(c, m, id, -1);
   }
@@ -95,6 +102,7 @@ public abstract class WidgetBase extends AppWidgetProvider {
     if (ACT.equals(i.getAction())) {
       final int ml = i.getIntExtra("ml", 250);
       final PendingResult pr = goAsync();
+      ((android.app.NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(4242);
       new Thread(() -> {
         try {
           SharedPreferences p = sp(c);
@@ -105,6 +113,7 @@ public abstract class WidgetBase extends AppWidgetProvider {
           int a = Math.round(60f * Math.min(old / (float) st[1], 1f)), b = Math.round(60f * Math.min(nw / (float) st[1], 1f));
           for (int s = a; s <= b; s++) { refresh(c, s); Thread.sleep(70); }
           refresh(c, -1);
+          Scheduler.schedule(c);
         } catch (Exception e) { } finally { pr.finish(); }
       }).start();
     } else super.onReceive(c, i);
