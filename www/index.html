@@ -65,6 +65,7 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
     </div>
   </div>
   <p class="fact" id="fact"></p>
+  <div id="chkw" hidden><p class="note" style="text-align:center;margin:0 0 8px">Morning check: urine colour?</p><div class="row"><button class="btn sm" data-u="1">Pale</button><button class="btn sm" data-u="2">Yellow</button><button class="btn sm" data-u="3">Dark</button></div></div>
   <label>Drink
     <select id="drink"></select>
   </label>
@@ -74,6 +75,7 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
     <button class="btn" data-ml="500">+500</button>
     <button class="btn" id="cust">Custom</button>
   </div>
+  <button class="btn sm" id="lc" hidden></button>
   <div class="row" id="custrow" hidden>
     <input id="cml" type="number" min="1" max="3000" inputmode="numeric" placeholder="ml">
     <button class="btn" id="cadd" style="flex:0 0 38%">Add</button>
@@ -93,9 +95,14 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
       <label>Humidity (%)<input id="rh" type="number" min="0" max="100" inputmode="numeric"></label>
       <label>Altitude (m)<input id="alt" type="number" min="0" max="5000" inputmode="numeric"></label>
       <label id="prl">Pregnancy / nursing<select id="pr"><option value="0">No</option><option value="1">Late pregnancy</option><option value="2">Nursing</option></select></label>
+      <label>Wake up<input id="wake" type="time"></label>
+      <label>Sleep<input id="slp" type="time"></label>
+      <label>Reminders every<select id="iv"><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></label>
+      <label>No caffeine after<input id="cut" type="time"></label>
     </div>
     <p class="note" id="why"></p>
     <p class="note" id="wxs"></p>
+    <p class="note">Sources: Yamada et al., Science 2022 (water turnover); EFSA 2015 (caffeine); Armstrong et al., J Nutr 2012 (mild dehydration). Other tips are general physiology.</p>
     <button class="btn sm" id="wxb">Update weather now</button>
     <div class="row"><button class="btn sm" id="bx">Export backup</button><button class="btn sm" id="bi">Import backup</button></div>
     <input type="file" id="impf" accept="application/json,.json" hidden>
@@ -116,20 +123,22 @@ const $=s=>document.querySelector(s);
 const DR=[["Water",1,0],["Coffee",1,40],["Tea",1,20],["Diet cola",1,12],["Milk",1.1,0],["Juice",1.05,0]];
 
 const FACTS=[
- ["Losing even 1-2% of your body's water can dull mood and concentration.","Thirst tends to show up after you are already slightly behind."],
- ["Water carries nutrients and helps cool you through sweat.","Roughly half or more of an adult body is water."],
+ ["About 1.4% body water loss lowered mood and brought on headaches in a study of young women.","In young men, mild dehydration raised fatigue and tension and made mental tasks harder."],
+ ["Water carries nutrients and helps cool you through sweat.","Roughly half or more of an adult's body weight is water."],
  ["Pale yellow urine is a simple sign you are well hydrated.","Food supplies about a fifth of your daily water."],
  ["Kidneys clear roughly a litre an hour at most. Steady sipping beats chugging.","The body cannot bank extra water, so spread it across the day."],
  ["Goal reached. Extra water beyond this is mostly passed straight out.","Done for today. From here, thirst and urine colour are your guide."]];
 const KEY="watr-proto-1",today=new Date().toLocaleDateString("sv-SE");
-let S={kg:75,sex:"m",by:1990,bf:"",act:1,temp:10,rh:60,alt:0,pr:0,day:today,log:[]};
+let S={kg:75,sex:"m",by:1990,bf:"",act:1,temp:10,rh:60,alt:0,pr:0,wake:"08:00",slp:"22:30",cut:"14:00",iv:90,lc:0,adj:0,ck:[],day:today,log:[]};
 try{const r=JSON.parse(localStorage.getItem(KEY));if(r)S=Object.assign(S,r)}catch(e){}
 if(S.day!==today){S.day=today;S.log=[]}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const PAL=[1.4,1.6,1.8,2.2];
 const wt=()=>{const a=new Date().getFullYear()-S.by,pal=PAL[S.act],ath=S.act===3?1:0,t=S.temp,x=S.sex==="f"?[0,670,260][S.pr]:0;
  return (S.bf>0?861.9*pal+37.34*S.kg*(1-S.bf/100)+4.288*S.rh+699.7*ath+0.514*S.alt-0.3625*a*a+29.42*a+1.937*t*t-23.15*t-984.8:1076*pal+14.34*S.kg+374.9*(S.sex==="m"?1:0)+5.823*S.rh+1070*ath+0.4726*S.alt-0.3529*a*a+24.78*a+1.865*t*t-19.66*t-713.1)+x};
-const goal=()=>Math.min(5500,Math.max(1000,Math.round(wt()*0.85*0.8/50)*50));
+const goal=()=>Math.min(5500,Math.max(1000,Math.round(wt()*0.85*0.8*(1+(S.adj||0))/50)*50));
+const cap=()=>S.sex==="f"&&S.pr>0?200:Math.min(400,Math.round(5.7*S.kg/10)*10);
+const hh=s=>{const a=String(s).split(":");return +a[0]+(+a[1]||0)/60};
 const eff=()=>Math.round(S.log.reduce((a,e)=>a+e.ml*e.f,0));
 let H={};try{H=JSON.parse(localStorage.getItem("watr-hist-1"))||{}}catch(e){}
 function hsave(){if(eff()>0||H[S.day]){H[S.day]={e:eff(),g:goal()};try{localStorage.setItem("watr-hist-1",JSON.stringify(H))}catch(e){}}}
@@ -141,21 +150,23 @@ for(let i=0;i<N;i++){const a=i/N*2*Math.PI-Math.PI/2,d=document.createElementNS(
  d.setAttribute("cx",150+122*Math.cos(a));d.setAttribute("cy",150+122*Math.sin(a));d.setAttribute("r",4.2);ring.appendChild(d);dots.push(d)}
 
 let P=0,target=0,surge=0,shown=0,want=0,shown2=0,want2=0,shownR=0,wantR=0;
-const M=40,CAP=400,idots=[],NS="http://www.w3.org/2000/svg",ig=document.createElementNS(NS,"g");
+const M=40,idots=[],NS="http://www.w3.org/2000/svg",ig=document.createElementNS(NS,"g");
 ig.style.transition="opacity .6s";ig.style.opacity=0;ring.appendChild(ig);
 for(let i=0;i<M;i++){const a=i/M*2*Math.PI-Math.PI/2,d=document.createElementNS(NS,"circle");
  d.setAttribute("cx",150+106*Math.cos(a));d.setAttribute("cy",150+106*Math.sin(a));d.setAttribute("r",2.8);ig.appendChild(d);idots.push(d)}
 function render(){
  const g=goal(),e=eff(),p=e/g;target=Math.min(p,1);
  want=Math.round(N*Math.min(p,1));
- const cf=S.log.reduce((a,e)=>a+e.ml*(e.c||0)/100,0);want2=Math.round(M*Math.min(cf/CAP,1));wantR=Math.round(M*Math.min(Math.max(cf-CAP,0)/CAP,1));$("#caf").style.color=cf>CAP?"#ff3b30":"";
- ig.style.opacity=cf>0?1:0;$("#caf").textContent=cf>0?"caffeine "+Math.round(cf)+" / "+CAP+" mg":"";
+ const cf=S.log.reduce((a,e)=>a+e.ml*(e.c||0)/100,0);want2=Math.round(M*Math.min(cf/cap(),1));wantR=Math.round(M*Math.min(Math.max(cf-cap(),0)/cap(),1));$("#caf").style.color=cf>cap()?"#ff3b30":"";
+ ig.style.opacity=cf>0?1:0;$("#caf").textContent=cf>0?"caffeine "+Math.round(cf)+" / "+cap()+" mg":"";
  if(reduce){shown=want;shown2=want2;shownR=wantR}paint();
  $("#pct").textContent=Math.round(p*100)+"%";
  $("#prl").hidden=S.sex!=="f";
- $("#why").textContent="Goal "+g+" ml. Based on a water turnover of about "+(wt()/1000).toFixed(1)+" L/day from the 2022 Yamada et al. Science equation. About 85% of turnover is water you take in, and I assume a fifth of that comes from food. The equation explains just under half of person-to-person variation, so treat it as a starting point.";
+ $("#lc").hidden=!S.lc;$("#lc").textContent="+"+S.lc+" ml (last custom)";
+ $("#chkw").hidden=!(new Date().getHours()<12&&!(S.ck||[]).some(x=>x.d===S.day));
+ $("#why").textContent="Goal "+g+" ml. Based on a water turnover of about "+(wt()/1000).toFixed(1)+" L/day from the 2022 Yamada et al. Science equation. About 85% of turnover is water you take in, and I assume a fifth of that comes from food. The equation explains just under half of person-to-person variation, so treat it as a starting point."+(S.adj?" Your morning checks adjust it by "+Math.round(S.adj*100)+"%.":"")+" Caffeine limit "+cap()+" mg a day (EFSA 2015: 5.7 mg per kg of body weight, up to 400 mg, or 200 mg in pregnancy and nursing).";
  $("#left").textContent=e>=g?"goal reached":(g-e)+" ml left";
- $("#fact").textContent=FACTS[p>=1?4:p>=.75?3:p>=.5?2:p>=.25?1:0][new Date().getDate()%2];
+ $("#fact").textContent=tip(p,cf);
  $("#log").textContent=S.log.length?S.log.length+" drinks · "+e+" of "+g+" ml":"Nothing logged yet today";
  save();lbl();sync();hsave();if(reduce)draw();clearTimeout(window._pt);window._pt=setTimeout(plan,1500);
 }
@@ -182,11 +193,11 @@ const buzz=p=>{const seq=Array.isArray(p)?p.map((d,i)=>i%2?Math.max(d,50):Math.m
 
 DR.forEach(([n,f],i)=>{const o=document.createElement("option");o.value=i;o.textContent=n;$("#drink").appendChild(o)});
 function add(ml,di,q){if(!(ml>0&&ml<=3000))return;const [n,f,c]=DR[di===undefined?$("#drink").value:di],before=eff()>=goal();
- S.log.push({ml,f,n,c});cleared=null;if(!q){surge=.05;drop()}
+ S.log.push({ml,f,n,c,t:Date.now()});if(c>0)S.cafSeen=true;cleared=null;if(!q){surge=.05;drop()}
  if(!q)buzz(!before&&eff()>=goal()?[20,60,20,60,40]:18);render()}
 document.querySelectorAll("[data-ml]").forEach(b=>b.onclick=()=>add(+b.dataset.ml));
 $("#cust").onclick=()=>{const r=$("#custrow");r.hidden=!r.hidden;if(!r.hidden)$("#cml").focus()};
-$("#cadd").onclick=()=>{add(+$("#cml").value);$("#cml").value=""};
+$("#cadd").onclick=()=>{const v=+$("#cml").value;if(v>0&&v<=3000)S.lc=v;add(v);$("#cml").value=""};
 $("#cml").onkeydown=e=>{if(e.key==="Enter")$("#cadd").click()};
 let ht,held=false,cleared=null;const ub=$("#undo");
 const lbl=()=>{ub.textContent=!S.log.length&&cleared?"Restore":"Undo (hold to clear)"};
@@ -196,8 +207,8 @@ ub.onpointerup=ub.onpointerleave=ub.onpointercancel=unhold;ub.oncontextmenu=e=>e
 ub.onclick=()=>{if(held){held=false;return}
  if(!S.log.length&&cleared){S.log=cleared;cleared=null;buzz(40)}else if(S.log.pop())buzz([8,40,8]);render()};
 $("#setup").onclick=()=>$("#panel").classList.toggle("on");
-["sex","by","kg","bf","act","temp","rh","alt","pr"].forEach(k=>{const el=$("#"+k);el.value=S[k];
- el.onchange=()=>{if(k==="sex")S[k]=el.value;else if(k==="bf"&&el.value==="")S.bf="";else if(el.value!==""&&!isNaN(+el.value))S[k]=+el.value;render()}});
+["sex","by","kg","bf","act","temp","rh","alt","pr","wake","slp","iv","cut"].forEach(k=>{const el=$("#"+k);el.value=S[k];
+ el.onchange=()=>{if(["sex","wake","slp","cut"].includes(k))S[k]=el.value;else if(k==="bf"&&el.value==="")S.bf="";else if(el.value!==""&&!isNaN(+el.value))S[k]=+el.value;render()}});
 
 // shoreline canvas
 const c=$("#c"),x=c.getContext("2d");let w,h,t=0;
@@ -216,14 +227,17 @@ const CP=(window.Capacitor&&Capacitor.Plugins)||{},LN=CP.LocalNotifications;
 async function plan(){if(!LN)return;
  try{const pend=await LN.getPending(),old=pend.notifications.filter(n=>n.id<9000);if(old.length)await LN.cancel({notifications:old});
   const left=goal()-eff();if(left<=0)return;
-  const now=new Date(),hn=now.getHours()+now.getMinutes()/60,exp=Math.min(1,Math.max(0,(hn-8)/13.5));
-  let t=new Date(now.getTime()+90*60000);if(eff()/goal()>exp+.1)t=new Date(t.getTime()+90*60000);
-  const out=[];
+  const w0=hh(S.wake),w1=hh(S.slp)-.5,iv=(S.iv||90)*60000,now=new Date(),hn=now.getHours()+now.getMinutes()/60,exp=Math.min(1,Math.max(0,(hn-w0)/(w1-w0)));
+  const hr=S.log.filter(e=>e.t&&Date.now()-e.t<3600e3).reduce((a,e)=>a+e.ml,0);
+  let t=new Date(now.getTime()+iv);if(eff()/goal()>exp+.1)t=new Date(t.getTime()+iv);if(hr>1000)t=new Date(t.getTime()+2*3600e3);
+  const out=[],setW=()=>t.setHours(Math.floor(w0),Math.round(w0%1*60),0,0);
   while(out.length<6){const h=t.getHours()+t.getMinutes()/60;
-   if(h<8)t.setHours(8,0,0,0);else if(h>21.5){t.setDate(t.getDate()+1);t.setHours(8,0,0,0)}
+   if(h<w0)setW();else if(h>w1){t.setDate(t.getDate()+1);setW()}
    out.push({id:100+out.length,channelId:"drink",title:"Time for water",body:left+" ml left today",schedule:{at:new Date(t),allowWhileIdle:true},actionTypeId:"DRINK"});
-   t=new Date(t.getTime()+90*60000)}
-  await LN.schedule({notifications:out})}catch(e){}}
+   t=new Date(t.getTime()+iv)}
+  await LN.schedule({notifications:out});
+  if(S.cafSeen){const c=hh(S.cut);await LN.schedule({notifications:[{id:9002,channelId:"drink",title:"Caffeine cutoff",body:"Last call for caffeine today. Water from here is easier on your sleep.",schedule:{on:{hour:Math.floor(c),minute:Math.round(c%1*60)},allowWhileIdle:true}}]})}
+ }catch(e){}}
 async function nativeInit(){if(!LN)return;
  try{await LN.requestPermissions();
   await LN.createChannel({id:"drink",name:"Drink reminders",importance:4,sound:"drop.wav",vibration:true});
@@ -242,6 +256,20 @@ async function wx(force){const st=m=>{const e=$("#wxs");if(e)e.textContent=m};
   st("Weather updated "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));render()}
  catch(e){st("Weather failed: "+((e&&e.message)||JSON.stringify(e)))}}
 $("#wxb").onclick=()=>wx(true);
+function tip(p,cf){const now=new Date(),hn=now.getHours()+now.getMinutes()/60,w0=hh(S.wake),w1=hh(S.slp),exp=Math.min(1,Math.max(0,(hn-w0)/(w1-w0)));
+ const hr=S.log.filter(e=>e.t&&Date.now()-e.t<3600e3).reduce((a,e)=>a+e.ml,0),last=S.log[S.log.length-1];
+ const late=S.log.some(e=>{if(!(e.c>0&&e.t))return false;const d=new Date(e.t);return d.getHours()+d.getMinutes()/60>=hh(S.cut)});
+ if(hr>1000)return "That is a lot in one hour. Kidneys clear about a litre an hour at most, so pause for a while.";
+ if(p>1.5)return "Well past your goal. No more water is needed today.";
+ if(cf>cap())return "You are over today's caffeine limit. Stick to water for the rest of the day.";
+ if(last&&last.c>0&&Date.now()-last.t<6e5&&last.ml*last.c/100>Math.min(200,3*S.kg))return "That is a big single dose of caffeine. Up to about 200 mg at once is considered fine.";
+ if(late)return "Caffeine this late can cost you sleep. Even 100 mg close to bedtime can affect it.";
+ if(S.temp>=25&&p<1)return "Hot day: your goal is raised. Sip steadily rather than all at once.";
+ if(p<1&&hn>w0&&hn<w1&&exp-p>.2)return "Behind pace for this time of day. A glass now catches you up.";
+ return FACTS[p>=1?4:p>=.75?3:p>=.5?2:p>=.25?1:0][now.getDate()%2]}
+$("#lc").onclick=()=>add(S.lc);
+document.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{S.ck=(S.ck||[]).concat({d:S.day,v:+b.dataset.u}).slice(-7);
+ const m=S.ck.reduce((a,x)=>a+x.v,0)/S.ck.length;S.adj=S.ck.length<3?0:m>=2.5?.1:m>=2.1?.05:m<=1.2?-.05:0;buzz(30);render()});
 function sync(){const P=CP.Preferences,W=CP.WidgetRefresh;if(!P)return;
  Promise.all([P.set({key:"sl_day",value:S.day}),P.set({key:"sl_eff",value:""+eff()}),P.set({key:"sl_goal",value:""+goal()})]).then(()=>W&&W.refresh()).catch(()=>{})}
 async function pull(){const P=CP.Preferences;if(!P)return;
