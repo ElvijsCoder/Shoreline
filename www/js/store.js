@@ -36,6 +36,9 @@ const nativeStore = {
   requestNotifications: async () => (await Native.requestNotifications()).granted,
   locate: () => Native.locate(),
   haptic: (o) => Native.haptic(o).catch(() => {}),
+  hcStatus: () => Native.hcStatus(),
+  hcEnable: async () => (await Native.hcEnable()).granted,
+  hcDisable: () => Native.hcDisable(),
   onChange: (cb) => Native.addListener("changed", cb),
   onOpen: (cb) => Native.addListener("open", (e) => cb(e.target)),
 };
@@ -91,6 +94,9 @@ const localStore = {
   locate: () => new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(
     (p) => resolve({ lat: Math.round(p.coords.latitude * 100) / 100, lon: Math.round(p.coords.longitude * 100) / 100 }),
     reject, { timeout: 20000, maximumAge: 3600000 })),
+  async hcStatus() { return { available: false, granted: false, on: false }; },
+  async hcEnable() { return false; },
+  async hcDisable() {},
   async haptic(o) { try { navigator.vibrate?.(o.pattern || (o.type === "heavy" ? 40 : 15)); } catch { /* no vibration */ } },
   onChange() {},
   onOpen() {},

@@ -11,12 +11,13 @@ cp www/drop.wav $D/res/raw/drop.wav
 cp -r native/res/* $D/res/
 cp -r native/icons/* $D/res/
 # Copy Shoreline's own Java by name, so a leftover file from an older version can't break the build.
-for f in MainActivity ShorePlugin Store Scheduler Notify ActionReceiver BootReceiver WidgetBase SmallWidget WideWidget ShorelineTile; do
+for f in MainActivity ShorePlugin Store Scheduler Notify ActionReceiver BootReceiver WidgetBase SmallWidget WideWidget ShorelineTile HealthSync; do
   cp native/java/$f.java $D/java/app/shoreline/water/
 done
 
-# Only the permissions Shoreline actually uses (no exact alarms, no precise location)
-sed -i 's#</manifest>#<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/><uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/><uses-permission android:name="android.permission.VIBRATE"/><uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/></manifest>#' $M
+# Only the permissions Shoreline actually uses (no exact alarms, no precise location;
+# Health Connect may only write water, never read)
+sed -i 's#</manifest>#<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/><uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/><uses-permission android:name="android.permission.VIBRATE"/><uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/><uses-permission android:name="android.permission.health.WRITE_HYDRATION"/></manifest>#' $M
 sed -i 's#<activity#<activity android:screenOrientation="portrait"#' $M
 python3 - <<'PY'
 m = 'android/app/src/main/AndroidManifest.xml'

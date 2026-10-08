@@ -110,6 +110,7 @@ public final class Store {
       } catch (JSONException ignored) { }
     }
     if (caf > 0) Scheduler.scheduleCaffeine(c);
+    HealthSync.write(c, e);
     return e;
   }
 
@@ -127,6 +128,7 @@ public final class Store {
       JSONObject last = arr.optJSONObject(arr.length() - 1); // entries are kept in time order
       arr.remove(arr.length() - 1);
       write(c, date, arr);
+      if (last != null) HealthSync.delete(c, last.optString("id"));
       return last;
     }
   }
@@ -140,7 +142,7 @@ public final class Store {
         if (e != null && id.equals(e.optString("id"))) { found = true; continue; }
         out.put(e);
       }
-      if (found) write(c, date, out);
+      if (found) { write(c, date, out); HealthSync.delete(c, id); }
       return found;
     }
   }
@@ -150,6 +152,7 @@ public final class Store {
     synchronized (LOCK) {
       JSONArray arr = day(c, date);
       write(c, date, new JSONArray());
+      HealthSync.delete(c, HealthSync.ids(arr));
       return arr;
     }
   }
@@ -157,6 +160,7 @@ public final class Store {
   /** Puts entries back, keeping anything added since (matched by id). */
   static void restoreDay(Context c, String date, JSONArray entries) {
     synchronized (LOCK) { write(c, date, sortByTime(merge(day(c, date), entries))); }
+    HealthSync.write(c, HealthSync.list(entries));
   }
 
   static void setGoal(Context c, String date, int g) {

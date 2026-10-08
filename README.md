@@ -72,7 +72,10 @@ Everything stays on your phone. No account, no ads.
 - **Tilt:** The water sloshes towards the low side when you tilt the phone.
 - **Rolling counter:** The percentage and "ml left" roll digit by digit, like a mechanical counter.
 
+- **Launch:** The icon's shoreline lights up dot by dot, then the app's shoreline sweeps in from the left to today's level.
+
 ### The rest
+- **Health Connect:** Optionally send your water to Android's Health Connect (Android 14+). Write-only, and removing a drink in Shoreline removes it there too.
 - **Sunday recap:** Your week in one notification: goal days, streak and daily average.
 - **Weather:** Fetched from Open-Meteo with a rough (~1 km) location, a few times a day, only if you turn it on.
 - **Backup:** Export and import everything as one file.
@@ -90,6 +93,7 @@ Everything stays on your phone. No account, no ads.
 | Wake and sleep time, reminders | **Settings → Your day** |
 | Fix yesterday | **History** → tap the day |
 | How the goal is worked out | **Settings → About your goal** |
+| Health Connect | **Settings → Health Connect** |
 | Backup | **Settings → Backup** |
 
 ---
@@ -135,6 +139,7 @@ native/java/
 ├─ Scheduler.java      reminders, midnight refresh, nudges
 ├─ ActionReceiver.java every button and alarm
 ├─ Notify.java         notifications
+├─ HealthSync.java     Health Connect (write-only)
 └─ WidgetBase / SmallWidget / WideWidget / ShorelineTile
 ```
 

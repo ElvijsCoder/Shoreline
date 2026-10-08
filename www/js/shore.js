@@ -7,7 +7,10 @@ import { reduceMotion, state } from "./state.js";
 
 const canvas = document.getElementById("shore");
 const x = canvas.getContext("2d");
-let w = 0, h = 0, t = 0, tide = 0, target = 0, surge = 0, frame = 0, raf = 0;
+// On launch the shoreline starts off-screen to the left and sweeps in to today's level,
+// picking up where the launch screen's icon leaves off.
+let w = 0, h = 0, t = 0, tide = reduceMotion ? 0 : -0.3, target = 0, surge = 0, frame = 0, raf = 0;
+const sweepFrom = performance.now() + 450; // a beat for the launch screen to fade
 let tilt = 0, tiltTarget = 0; // -1 (tilted left) … 1 (tilted right)
 let wave = -1; // goal wave progress 0..1, -1 when idle
 const foam = []; // particles left behind by the wave
@@ -87,7 +90,7 @@ function loop() {
   frame++;
   if (moving || frame % 3 === 0) { // ~20 fps ambient waves when settled
     t += moving ? 0.012 : 0.036;
-    tide += (target - tide) * 0.04;
+    if (performance.now() > sweepFrom) tide += (target - tide) * 0.04;
     surge *= 0.94;
     step();
     draw();

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch icon: sand fades in, the sea follows, then the shoreline lights up dot by dot (under 1 s). -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector android:width="240dp" android:height="240dp" android:viewportWidth="108" android:viewportHeight="108">
+            <path android:name="sand0" android:fillAlpha="0" android:fillColor="#363636" android:pathData="M24.00,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM31.50,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM39.00,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM24.00,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM31.50,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM39.00,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM24.00,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM31.50,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM39.00,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM24.00,43.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand1" android:fillAlpha="0" android:fillColor="#383838" android:pathData="M46.50,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand2" android:fillAlpha="0" android:fillColor="#3A3A3A" android:pathData="M31.50,43.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand3" android:fillAlpha="0" android:fillColor="#3E3E3E" android:pathData="M46.50,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM24.00,81.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand4" android:fillAlpha="0" android:fillColor="#3F3F3F" android:pathData="M46.50,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand5" android:fillAlpha="0" android:fillColor="#434343" android:pathData="M54.00,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand6" android:fillAlpha="0" android:fillColor="#444444" android:pathData="M39.00,43.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM24.00,51.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand7" android:fillAlpha="0" android:fillColor="#484848" android:pathData="M54.00,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM31.50,81.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand8" android:fillAlpha="0" android:fillColor="#4A4A4A" android:pathData="M54.00,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand9" android:fillAlpha="0" android:fillColor="#4C4C4C" android:pathData="M24.00,73.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand10" android:fillAlpha="0" android:fillColor="#4E4E4E" android:pathData="M61.50,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand11" android:fillAlpha="0" android:fillColor="#4F4F4F" android:pathData="M46.50,43.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM31.50,51.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand12" android:fillAlpha="0" android:fillColor="#535353" android:pathData="M61.50,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM24.00,58.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM39.00,81.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand13" android:fillAlpha="0" android:fillColor="#555555" android:pathData="M61.50,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand14" android:fillAlpha="0" android:fillColor="#565656" android:pathData="M24.00,66.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand15" android:fillAlpha="0" android:fillColor="#575757" android:pathData="M31.50,73.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand16" android:fillAlpha="0" android:fillColor="#595959" android:pathData="M69.00,28.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand17" android:fillAlpha="0" android:fillColor="#5A5A5A" android:pathData="M54.00,43.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM39.00,51.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand18" android:fillAlpha="0" android:fillColor="#5E5E5E" android:pathData="M69.00,36.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM31.50,58.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2zM46.50,81.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand19" android:fillAlpha="0" android:fillColor="#5F5F5F" android:pathData="M69.00,21.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand20" android:fillAlpha="0" android:fillColor="#616161" android:pathData="M31.50,66.40a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sand21" android:fillAlpha="0" android:fillColor="#626262" android:pathData="M39.00,73.90a2.6,2.6 0,1 1,0 5.2a2.6,2.6 0,1 1,0 -5.2z" />
+            <path android:name="sea" android:fillAlpha="0" android:fillColor="#2A2A2A" android:pathData="M84.00,22.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,37.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM76.50,45.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,45.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM61.50,52.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM69.00,52.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM76.50,52.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,52.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM46.50,60.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM54.00,60.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM61.50,60.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM69.00,60.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM76.50,60.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,60.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM46.50,67.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM54.00,67.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM61.50,67.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM69.00,67.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM76.50,67.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,67.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM54.00,75.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM61.50,75.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM69.00,75.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM76.50,75.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,75.30a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM61.50,82.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM69.00,82.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM76.50,82.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4zM84.00,82.80a1.2,1.2 0,1 1,0 2.4a1.2,1.2 0,1 1,0 -2.4z" />
+            <path android:name="shore0" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M76.50,21.00a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore1" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M84.00,28.50a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore2" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M76.50,28.50a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore3" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M76.50,36.00a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore4" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M69.00,43.50a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore5" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M61.50,43.50a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore6" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M54.00,51.00a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore7" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M46.50,51.00a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore8" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M39.00,58.50a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore9" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M39.00,66.00a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore10" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M46.50,73.50a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+            <path android:name="shore11" android:fillAlpha="0" android:fillColor="#F3F3F0" android:pathData="M54.00,81.00a3.0,3.0 0,1 1,0 6.0a3.0,3.0 0,1 1,0 -6.0z" />
+        </vector>
+    </aapt:attr>
+    <target android:name="sand0">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand1">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand2">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand3">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand4">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand5">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand6">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand7">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand8">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand9">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand10">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand11">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand12">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand13">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand14">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand15">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand16">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand17">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand18">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand19">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand20">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sand21">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="0" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="sea">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="120" android:duration="320" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore0">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="260" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore1">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="310" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore2">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="360" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore3">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="410" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore4">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="460" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore5">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="510" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore6">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="560" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore7">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="610" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore8">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="660" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore9">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="710" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore10">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="760" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+    <target android:name="shore11">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="810" android:duration="170" android:valueType="floatType"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+</animated-vector>

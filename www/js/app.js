@@ -188,9 +188,11 @@ function wireHome() {
 function openTarget(target) {
   if (target === "settings:you") openSettings("you");
   if (target === "history") $("#openHistory").click();
+  if (target === "settings:health") openSettings("health");
 }
 
 async function boot() {
+  requestAnimationFrame(() => document.body.classList.remove("launch"));
   initRing($("#ring"));
   initShore();
   wireHome();

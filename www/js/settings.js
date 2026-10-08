@@ -84,7 +84,33 @@ function importBackup(file) {
   reader.readAsText(file);
 }
 
+// Health Connect: a switch that asks Android for permission the first time it's turned on.
+async function healthStatus() {
+  const st = await store.hcStatus();
+  const tog = $("#hcToggle"), note = $("#hcStatus");
+  tog.hidden = !st.available;
+  tog.setAttribute("aria-checked", String(st.on));
+  tog.querySelector(".s > span").textContent = st.on ? "ON" : "OFF";
+  note.textContent = !st.available
+    ? (store.native ? "Health Connect needs Android 14 or newer." : "Health Connect works in the phone app.")
+    : st.on ? "Sending your water to Health Connect." : "";
+}
+
+async function toggleHealth() {
+  const st = await store.hcStatus();
+  if (st.on) {
+    await store.hcDisable();
+  } else {
+    const ok = await store.hcEnable().catch(() => false);
+    if (!ok) $("#hcStatus").textContent = "Permission wasn't given. You can allow it in Health Connect's settings and try again.";
+  }
+  await reload(); // the profile's on/off flag changed natively
+  await healthStatus();
+  if (!st.on && (await store.hcStatus()).on) $("#hcStatus").textContent = "On. Your last 30 days were sent, and new drinks follow automatically.";
+}
+
 export function initSettings() {
+  $("#hcToggle").onclick = toggleHealth;
   mountFields(root());
   $("#openSettings").onclick = () => openSettings();
   $("#weatherNow").onclick = () => updateWeather(true, say("#weatherStatus"));
@@ -110,8 +136,10 @@ export function openSettings(section) {
   explain();
   notifStatus();
   drinkList();
+  healthStatus();
   if (section === "you") {
     $("#you").scrollIntoView();
     root().querySelector('[data-key="kg"]')?.focus();
   }
+  if (section === "health") $("#health").scrollIntoView();
 }

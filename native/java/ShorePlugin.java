@@ -32,7 +32,8 @@ import org.json.JSONObject;
     name = "Shore",
     permissions = {
       @Permission(alias = "notifications", strings = {Manifest.permission.POST_NOTIFICATIONS}),
-      @Permission(alias = "location", strings = {Manifest.permission.ACCESS_COARSE_LOCATION})
+      @Permission(alias = "location", strings = {Manifest.permission.ACCESS_COARSE_LOCATION}),
+      @Permission(alias = "health", strings = {HealthSync.PERMISSION})
     })
 public class ShorePlugin extends Plugin {
   private static WeakReference<ShorePlugin> live = new WeakReference<>(null);
@@ -43,13 +44,21 @@ public class ShorePlugin extends Plugin {
     Store.migrateLegacy(getContext());
     Notify.channels(getContext());
     Intent i = getActivity().getIntent();
-    if (i != null) pendingTarget = i.getStringExtra("open");
+    if (i != null) pendingTarget = targetOf(i);
   }
+
+  /** Where an intent wants the app to open: a notification's target, or Health Connect's "why" link. */
+  private static String targetOf(Intent i) {
+    if (VIEW_PERMISSION_USAGE.equals(i.getAction())) return "settings:health";
+    return i.getStringExtra("open");
+  }
+
+  private static final String VIEW_PERMISSION_USAGE = "android.intent.action.VIEW_PERMISSION_USAGE";
 
   /** A notification tapped while the app is already open. */
   @Override protected void handleOnNewIntent(Intent i) {
     super.handleOnNewIntent(i);
-    String t = i.getStringExtra("open");
+    String t = targetOf(i);
     if (t != null) notifyListeners("open", new JSObject().put("target", t));
   }
 
@@ -168,6 +177,44 @@ public class ShorePlugin extends Plugin {
     boolean on = Notify.nm(ctx()).areNotificationsEnabled();
     if (on) Scheduler.schedule(ctx());
     call.resolve(new JSObject().put("granted", on));
+  }
+
+  // --- Health Connect ----------------------------------------------------------------
+
+  @PluginMethod public void hcStatus(PluginCall call) {
+    call.resolve(new JSObject()
+        .put("available", HealthSync.available())
+        .put("granted", HealthSync.granted(ctx()))
+        .put("on", HealthSync.enabled(ctx())));
+  }
+
+  /** Asks for permission to write water, then switches syncing on and sends the last 30 days. */
+  @PluginMethod public void hcEnable(PluginCall call) {
+    if (!HealthSync.available()) { call.reject("Health Connect needs Android 14 or newer"); return; }
+    if (getPermissionState("health") != PermissionState.GRANTED) requestPermissionForAlias("health", call, "hcResult");
+    else hcResult(call);
+  }
+
+  @PermissionCallback private void hcResult(PluginCall call) {
+    boolean ok = HealthSync.granted(ctx());
+    if (ok) {
+      setHc(true);
+      new Thread(() -> HealthSync.backfill(ctx(), 30)).start();
+    }
+    call.resolve(new JSObject().put("granted", ok));
+  }
+
+  @PluginMethod public void hcDisable(PluginCall call) {
+    setHc(false);
+    call.resolve();
+  }
+
+  private void setHc(boolean on) {
+    try {
+      JSONObject p = Store.profile(ctx());
+      p.put("hc", on);
+      Store.setProfile(ctx(), p);
+    } catch (Exception ignored) { }
   }
 
   // --- Location (coarse, rounded: weather doesn't need more) --------------------------

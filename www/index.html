@@ -6,7 +6,7 @@
 <title>Shoreline</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="launch">
 <canvas id="shore" aria-hidden="true"></canvas>
 
 <main id="home">
@@ -130,6 +130,14 @@
       </div>
       <button class="btn sm" id="newDrinkAdd">Add drink</button>
     </div>
+
+    <h2 id="health">HEALTH CONNECT</h2>
+    <button class="tog" id="hcToggle" role="switch" aria-checked="false">
+      <span class="t"><span>Send water to Health Connect</span><small>Your drinks appear alongside your other health data</small></span>
+      <span class="s"><i></i><span>OFF</span></span>
+    </button>
+    <p class="note" id="hcStatus"></p>
+    <p class="note">Shoreline only <b>writes</b> each drink's amount and time; it never reads anything from Health Connect. Removing a drink in Shoreline removes it there too. Turning this off stops sending; what's already there stays until you delete it in Health Connect.</p>
 
     <h2>BACKUP</h2>
     <div class="row"><button class="btn sm" id="exportBtn">Export backup</button><button class="btn sm" id="importBtn">Import backup</button></div>
