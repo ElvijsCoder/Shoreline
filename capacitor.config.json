@@ -7,7 +7,9 @@
   },
   "plugins": {
     "LocalNotifications": {
-      "sound": "drop.wav"
+      "sound": "drop.wav",
+      "smallIcon": "ic_stat_shoreline",
+      "iconColor": "#FFFFFF"
     }
   }
 }

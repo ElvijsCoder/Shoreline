@@ -4,6 +4,7 @@ D=android/app/src/main
 mkdir -p $D/res/raw
 cp assets/drop.wav $D/res/raw/drop.wav
 cp -r native/res/* $D/res/
+cp -r native/icons/* $D/res/
 cp native/java/*.java $D/java/app/shoreline/water/
 M=$D/AndroidManifest.xml
 sed -i 's#</manifest>#<uses-permission android:name="android.permission.USE_EXACT_ALARM"/><uses-permission android:name="android.permission.VIBRATE"/><uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/><uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/></manifest>#' $M

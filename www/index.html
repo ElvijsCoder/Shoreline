@@ -97,6 +97,9 @@ label{display:flex;flex-direction:column;gap:4px;color:var(--dim)}
     <p class="note" id="why"></p>
     <p class="note" id="wxs"></p>
     <button class="btn sm" id="wxb">Update weather now</button>
+    <div class="row"><button class="btn sm" id="bx">Export backup</button><button class="btn sm" id="bi">Import backup</button></div>
+    <input type="file" id="impf" accept="application/json,.json" hidden>
+    <p class="note" id="bst"></p>
   </div>
   <p class="log" id="log"></p>
   <div id="hist" hidden><div class="hw">
@@ -243,6 +246,19 @@ function sync(){const P=CP.Preferences,W=CP.WidgetRefresh;if(!P)return;
  Promise.all([P.set({key:"sl_day",value:S.day}),P.set({key:"sl_eff",value:""+eff()}),P.set({key:"sl_goal",value:""+goal()})]).then(()=>W&&W.refresh()).catch(()=>{})}
 async function pull(){const P=CP.Preferences;if(!P)return;
  try{const r=await P.get({key:"sl_pending"}),n=parseInt(r.value||"0");if(n>0){await P.set({key:"sl_pending",value:"0"});add(n,0,true)}}catch(e){}}
+const bst=m=>{$("#bst").textContent=m};
+async function exportData(){const data=JSON.stringify({v:1,S,H}),F=CP.Filesystem,Sh=CP.Share;
+ try{if(F&&Sh){const name="shoreline-backup-"+S.day+".json";await F.writeFile({path:name,data,directory:"CACHE",encoding:"utf8"});
+   const u=await F.getUri({path:name,directory:"CACHE"});await Sh.share({title:"Shoreline backup",files:[u.uri]});bst("Backup ready to save or send.")}
+  else{await navigator.clipboard.writeText(data);bst("Backup copied to the clipboard.")}}catch(e){bst("Export failed: "+((e&&e.message)||e))}}
+$("#bx").onclick=exportData;
+$("#bi").onclick=()=>$("#impf").click();
+$("#impf").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S&&!d.H)throw new Error("not a Shoreline backup");
+  Object.assign(H,d.H||{});if(d.S){["kg","sex","by","bf","act","temp","rh","alt","pr"].forEach(k=>{if(d.S[k]!==undefined)S[k]=d.S[k]});if(d.S.day===S.day&&Array.isArray(d.S.log))S.log=d.S.log}
+  try{localStorage.setItem("watr-hist-1",JSON.stringify(H))}catch(x){}
+  ["sex","by","kg","bf","act","temp","rh","alt","pr"].forEach(k=>$("#"+k).value=S[k]);render();bst("Imported "+Object.keys(d.H||{}).length+" days of history.")}
+  catch(x){bst("Import failed: "+x.message)}e.target.value=""};r.readAsText(f)};
 let HM="w";
 function hist(){const NS="http://www.w3.org/2000/svg",n=HM==="w"?7:30,ds=[];
  for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);ds.push(d.toLocaleDateString("sv-SE"))}
