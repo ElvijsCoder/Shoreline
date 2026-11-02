@@ -1,5 +1,6 @@
 package app.shoreline.water;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import androidx.core.splashscreen.SplashScreen;
@@ -17,5 +18,7 @@ public class MainActivity extends BridgeActivity {
 
     registerPlugin(ShorePlugin.class);
     super.onCreate(b);
+    // The manifest already says portrait; this keeps it even where a launcher or OS setting overrides it.
+    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
   }
 }

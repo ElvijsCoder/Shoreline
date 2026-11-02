@@ -44,10 +44,12 @@ jobs:
           name: Shoreline-${{ github.run_number }}
           path: Shoreline-${{ github.run_number }}.apk
 
-      # A release per build: a direct APK link you can open on the phone.
+      # A release per build. Full releases (not pre-releases) so Obtainium picks them up,
+      # tagged with the same version the APK reports (1.1.N) so it can tell what's newer.
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ github.run_number }}
-          name: Build ${{ github.run_number }}
-          prerelease: true
+          tag_name: v1.1.${{ github.run_number }}
+          name: Shoreline 1.1.${{ github.run_number }}
+          prerelease: false
+          make_latest: true
           files: Shoreline-${{ github.run_number }}.apk

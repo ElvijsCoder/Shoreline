@@ -49,6 +49,10 @@ button, select, input { font: inherit; color: var(--foam); }
 
 select, input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: #0a0a0acc; }
 label { display: flex; flex-direction: column; gap: 4px; color: var(--dim); }
+.inrow { display: flex; gap: 8px; align-items: center; }
+.inrow input { flex: 1; min-width: 0; }
+.saved { color: var(--foam); font-size: 12px; }
+.saved:empty { display: none; }
 #drink { text-align: center; text-align-last: center; }
 .note { color: var(--dim); font-size: 13px; margin: 0; }
 .log { color: var(--dim); font-size: 13px; text-align: center; margin: 0; }

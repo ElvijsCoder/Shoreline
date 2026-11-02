@@ -1,6 +1,6 @@
 // Every setting is defined once here and drawn into Settings and the welcome screens.
 // Values are checked against min/max so a typo can't turn the goal into nonsense.
-import { state, saveProfile } from "./state.js";
+import { state, saveProfile, currentGoal } from "./state.js";
 
 const thisYear = new Date().getFullYear();
 
@@ -84,7 +84,29 @@ function control(k) {
     if (f.optional) el.placeholder = "optional";
   }
   el.dataset.key = k;
-  label.appendChild(el);
+  // A quiet confirmation after every change, so you know it took.
+  const note = document.createElement("small");
+  note.className = "saved";
+  note.setAttribute("aria-live", "polite");
+  let noteTimer = 0;
+  const flash = (text) => {
+    note.textContent = text;
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => (note.textContent = ""), 4000);
+  };
+  if (k === "kg") {
+    // Weight gets an explicit button: the weekly check should end with a clear "done".
+    const row = document.createElement("div");
+    row.className = "inrow";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn sm pill";
+    btn.textContent = "Update";
+    btn.onclick = () => { commit(); el.blur(); };
+    row.append(el, btn);
+    label.appendChild(row);
+  } else label.appendChild(el);
+  label.appendChild(note);
   label.sync = () => {
     if (document.activeElement === el) return; // don't overwrite what you're typing
     const v = value(k);
@@ -92,16 +114,19 @@ function control(k) {
     if (f.show) label.hidden = !f.show();
     el.removeAttribute("aria-invalid");
   };
-  el.onchange = () => {
+  const commit = () => {
     if (f.type === "number") {
-      if (el.value === "" && f.optional) { set(k, 0); return; }
+      if (el.value === "" && f.optional) { set(k, 0); flash("Saved"); return; }
       const n = +el.value;
       if (el.value === "" || !Number.isFinite(n) || n < f.min || n > f.max) {
         el.setAttribute("aria-invalid", "true");
+        flash(`Not saved: enter ${f.min}–${f.max}`);
         el.value = value(k) || ""; // put back the last good value
         return;
       }
+      el.removeAttribute("aria-invalid");
       set(k, n);
+      flash(k === "kg" ? `Saved · daily goal now ${currentGoal().toLocaleString("en-US")} ml` : "Saved");
     } else if (f.type === "time") {
       if (/^\d{2}:\d{2}$/.test(el.value)) set(k, el.value); else el.value = value(k);
     } else {
@@ -109,6 +134,7 @@ function control(k) {
     }
     if (k === "sex") document.querySelectorAll("[data-fields]").forEach((g) => g.syncAll?.());
   };
+  el.onchange = commit;
   label.sync();
   return label;
 }
