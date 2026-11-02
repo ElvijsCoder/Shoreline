@@ -1,3 +1,8 @@
 node_modules/
 android/
 *.apk
+
+# Signing keys and their secrets never go in the repo
+*.jks
+*.keystore
+signing-secrets*.txt

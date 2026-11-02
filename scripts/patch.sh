@@ -29,20 +29,23 @@ PY
 # Android 8+ (notification channels and the APIs the native code uses)
 sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 26/' android/variables.gradle
 
-# A fixed signing key, so every build installs over the last one and keeps your data,
-# and a version number that goes up with every build.
-cp keys/shoreline-debug.keystore android/app/shoreline-debug.keystore
+# Signed with Shoreline's private key (GitHub secrets -> KEYSTORE_PATH / KEYSTORE_PASSWORD),
+# so every build installs over the last one and keeps your data. Release build: not debuggable.
 cat >> android/app/build.gradle <<'GRADLE'
 
 android {
     signingConfigs {
-        debug {
-            storeFile file('shoreline-debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+        release {
+            storeFile file(System.getenv('KEYSTORE_PATH'))
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias 'shoreline'
+            keyPassword System.getenv('KEYSTORE_PASSWORD')
         }
     }
+    buildTypes {
+        release { signingConfig signingConfigs.release }
+    }
+    lint { checkReleaseBuilds false }
     defaultConfig {
         versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as Integer)
         versionName "1.1.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"

@@ -102,7 +102,7 @@ Everything stays on your phone. No account, no ads.
 
 1. **Push** to `main`. GitHub Actions runs the tests and builds the APK.
 2. **Download:** Open **Releases** on your phone and grab the newest `Shoreline-N.apk`.
-3. **Install:** Every build is signed with the same key (`keys/shoreline-debug.keystore`), so new versions install over the old one and keep your data.
+3. **Install:** Every build is signed with Shoreline's private key (stored only as GitHub secrets `KEYSTORE_BASE64` and `KEYSTORE_PASSWORD`), so new versions install over the old one and keep your data. Updates arrive through Obtainium.
 
 ### Coming from the first version?
 The first version was signed with a different key every build, so Android needs one last uninstall. To keep your history:
